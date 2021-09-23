@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Today's Date</title>
+</head>
+
+<body style="margin-right:15px;">
+	<div id="content" style="font-family: 'Dancing Script', cursive; color:grey; font-size:300%; text-align: left;"></div>
+	<script>
+		let startDate = new Date()
+		setInterval(function() {
+			let d = new Date() - startDate;
+			console.log(d + " è " + Math.floor(d / (1000 * 60)) + " minuti e " + ((d / 1000) % 60))
+			let time = ("0" + Math.floor(d / (1000 * 60))).slice(-2) + ":" + ("0" + Math.floor(((d / 1000) % 60))).slice(-2);
+			document.getElementById("content").innerHTML = "Sono assente da " + time;
+		},1000);
+		
+	</script>
+</body>
+
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Today's Date</title>
+	<script>
+		var t=setInterval(function() {
+			let d = new Date();
+			document.getElementById("content").innerHTML = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+		},1000);
+    </script>
+</head>
+
+<body style="margin-right:15px;">
+	<div id="displayday" style="font-family: 'Dancing Script', cursive; color:grey; font-size:150%; text-align: right;" onload="addDay();"></div>
+	<div id="content" style="font-family: 'Dancing Script', cursive; color:grey; font-size:300%; text-align: right;"></div>
+	<script>
+		const queryString = window.location.search;
+		const urlParams = new URLSearchParams(queryString);
+		let d = new Date();
+		let startDate = new Date('7/25/2021')
+		if(urlParams.get('day')) {
+			startDate = new Date(urlParams.get('day'));
+		}
+		const diffTime = d - startDate;
+		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+		document.getElementById("displayday").innerHTML = "Giorno "+diffDays;
+	</script>
+</body>
+
+</html>

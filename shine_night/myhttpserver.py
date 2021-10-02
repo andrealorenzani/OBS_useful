@@ -54,6 +54,13 @@ class MyServer(BaseHTTPRequestHandler):
             f = open("./show_status.html", "r")
             self.wfile.write(bytes(f.read(), "utf-8"))
             return
+        if self.path == "/updeck":
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            f = open("./kill_updeck.log", "r")
+            self.wfile.write(bytes(f.read(), "utf-8"))
+            return
         if self.path == "/status/update":
             self.send_response(200)
             self.send_header("Content-type", "text/html")

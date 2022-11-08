@@ -9,7 +9,7 @@ from datetime import datetime
 hostName = "0.0.0.0"
 serverPort = 8998
 current_status = '{ "status": "!!! Nessuno status, ancora... !!!", "eng": "!!! No status, by now...!!!", "time": "'+datetime.now().isoformat()+'" }'
-start = '{"time":"2021-09-25T22:05:00.000+01:00"}'
+start = '{"time":"Nothing"}'
 longitude = "-0.1345728"
 latitude = "51.6155497"
 
@@ -24,6 +24,20 @@ class MyServer(BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/html")
             self.end_headers()
             f = open("./update.html", "r")
+            self.wfile.write(bytes(f.read(), "utf-8"))
+            return
+        if self.path == "/chat":
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            f = open("./chat.html", "r")
+            self.wfile.write(bytes(f.read(), "utf-8"))
+            return
+        if self.path == "/chat_group":
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            f = open("./chat_group.html", "r")
             self.wfile.write(bytes(f.read(), "utf-8"))
             return
         if self.path == "/brb":
@@ -125,6 +139,17 @@ class MyServer(BaseHTTPRequestHandler):
             longitude = data['longitude']
             latitude = data['latitude']
             print("New start: {}".format(json.dumps(data)))
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(bytes(json.dumps({}), "utf-8"))
+        if self.path == "/stop":
+            content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
+            post_data = self.rfile.read(content_length) # <--- Gets the data itself
+            data = json.loads(post_data.decode('utf-8'))
+            start = '{"time":"Nothing"}'
+            print("Stopped")
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.send_header("Access-Control-Allow-Origin", "*")

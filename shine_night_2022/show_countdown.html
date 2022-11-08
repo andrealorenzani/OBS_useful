@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+	<script
+	  src="https://code.jquery.com/jquery-3.6.1.slim.min.js"
+	  integrity="sha256-w8CvhFs7iHNVUtnSP0YKEg00p9Ih13rlL9zGqvLdePA="
+	  crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Today's Date</title>
+</head>
+
+<body>
+	<div style="display: flow-root">
+		<div id="time" style="color:white; font-size:300%;"></div>
+	</div>
+	<script>
+		// YYYY-MM-DDTHH:mm:ss.sssZ
+		function getSearchParams(k){
+			var p={};
+			location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(s,k,v){p[k]=v})
+			return k?p[k]:null;
+		}
+		function set_walking() {
+			let d = Math.abs(datetime - new Date());
+			let time = ("0" + Math.floor(d / (1000 * 60 * 60))).slice(-2) + ":" + ("0" + Math.floor(d / (1000 * 60)) % (60)).slice(-2) + ":" + ("0" + Math.floor(((d / 1000) % 60))).slice(-2);
+			if(absTime && (datetime > new Date())) {
+				time = "-" + time;
+			}
+			$('#time').empty().append(
+				time
+			);
+		}
+		datetime = getSearchParams('since')?Date.parse(getSearchParams('since')):new Date();
+		absTime = getSearchParams('absTime')?getSearchParams('absTime').toLowerCase() === "true":false;
+		setInterval(set_walking,1000);
+		
+	</script>
+</body>
+
+</html>

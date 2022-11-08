@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Today's Date</title>
+</head>
+<body>
+	<div id="panel" style="position:absolute; bottom:0px;"> <div style="opacity: 0.75; width: 370px; height: 370px; background-image: url('/quotes/img');"> <!-- display:none-->
+		<div id="quote" style="margin-left: 15px; color:  white; font-weight: bolder;text-align: center; width: 270px; height: 240px; vertical-alignment: middle; padding: 30px; padding-top: 100px;"></div>
+		<div id="author" style="text-align:right; margin-left:30px; position:  absolute; top:  0px;left: 20px; ont-weight: bolder; color:  white; text-shadow: 2px 2px 1px red; center; width: 230px; height: 30px; vertical-alignment: middle; padding: 30px;" ></div></div>
+	</div>
+	
+	<script>
+		$( document ).ready(function() {
+			$("#panel").height(0).hide();
+			populateQuotes();
+		});
+
+		function populateQuotes() {
+			$.get('/quotes/retrieve', concatQuotes);
+		}
+
+		function concatQuotes(data, status) {
+			if(status > 299) return;
+			var quotes = data['quotes'];
+			if(quotes.length > 0) {
+				for(const quote of quotes) {
+					$('#quote').append('<div> ' + quote['quote'] + '</div>');
+					$('#author').append('<div> --' + quote['author'] + '</div>');
+				}
+				$('#quote > div').hide();
+				$('#author > div').hide();
+				showPanel();
+			}
+			else {
+				setTimeout(populateQuotes, (5 * 60000));
+			}
+		}
+
+		function showPanel() {
+			$('#panel').show().ready(function() {
+				$('#quote > div:first').show();
+				var delay = ($('#quote > div:first').text().replace(/(\r\n|\n|\r)/gm, "").split(" ").length / 4) + 2;
+				$('#author > div:first').show();
+				$("#panel").animate({height: 370},750);
+				setTimeout(hideAndMoveToNext, delay * 1000);
+			});
+		}
+		function hideAndMoveToNext() {
+			$("#panel").animate({height: 0},750, function() {
+				$('#quote > div:first').remove();
+				$('#author > div:first').remove();
+				$("#panel").hide();
+				if ( $( "#quote" ).text().length > 0 ) {
+					showPanel();
+				}
+				else {
+					setTimeout(populateQuotes, (60000));
+				}
+			});
+		}
+	
+	</script>
+</body>
+	
+</html>

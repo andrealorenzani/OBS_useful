@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<!-- script src="https://sachinchoolur.github.io/lightslider/src/js/lightslider.js"></script -->
+	<script src="https://rawgit.com/pixedelic/Camera/master/scripts/camera.min.js"></script>
+	<link rel="stylesheet" id="camera-css" href="https://www.pixedelic.com/plugins/camera/camera.css" type="text/css" media="all">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Today's Date</title>
+	
+	</head>
+
+<body style="margin-right:15px;">
+	<form action="https://supermaestro-uk.duckdns.org:8998/start" id="startMarathon">
+	  <input type="submit" value="start marathon">
+	</form>
+	
+	<div id="content"></div>
+	<div id="error"></div>
+	
+	<form action="https://supermaestro-uk.duckdns.org:8998/stop" id="stopMarathon">
+	  <input type="submit" value="stop marathon">
+	</form>
+	
+	<div id="content2"></div>
+	<div id="error2"></div>
+	
+	
+	<script>
+		
+var latitude = 0;
+var longitude = 0;
+var promise = null;
+		
+		
+$( "#startMarathon" ).submit(function( event ) {
+ 
+  // Stop form from submitting normally
+  event.preventDefault();
+  var $form = $( this ),
+	  url = $form.attr( "action" );
+  var data = {time: new Date()};
+  promise = new Promise((res, rej) => {
+    getLocation(res, rej);
+  }).then(value => data = { latitude: latitude, longitude: longitude, time: new Date() })
+  .catch( err => data = { time: new Date() })
+  .then(value => send(value, url));
+});
+
+$( "#stopMarathon" ).submit(function( event ) {
+ 
+  // Stop form from submitting normally
+  event.preventDefault();
+  var $form = $( this ),
+	  url = $form.attr( "action" );
+  var data = {time: new Date()};
+  promise = new Promise((res, rej) => {
+    getLocation(res, rej);
+  }).then(value => data = { latitude: latitude, longitude: longitude, time: new Date() })
+  .catch( err => data = { time: new Date() })
+  .then(value => send(value, url));
+});
+		
+function send(data, url) {
+	console.log("Sending: "+JSON.stringify(data));
+	var posting = $.post( url, JSON.stringify(data) );
+
+	// Put the results in a div
+	posting.done(function( data ) {
+		$( "#content" ).empty().append( "successo "+ new Date().toString() );
+	});
+}
+
+function getLocation(res, rej) {
+   //rej();
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition(res));
+  } else { 
+    $( "#error" ).empty().append( "Geolocation is not supported by this browser." );
+	rej();
+  }
+}
+
+function showPosition(res) {
+	return function(position) {
+		latitude = position.coords.latitude; 
+  		longitude = position.coords.longitude;
+		res();
+	}
+}
+	</script>
+</body>
+
+</html>
+

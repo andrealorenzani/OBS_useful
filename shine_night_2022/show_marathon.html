@@ -18,7 +18,7 @@
 		<div id="time" style="font-family: 'Ubuntu', sans-serif; color:grey; font-size:300%; text-align: right; float:right;"></div>
 		<img src="https://i.gifer.com/Z92m.gif" style="float: right; height: 60px;" />
 	</div>
-	<div style="visibility:hidden;">
+	<div> <!-- style="visibility:hidden;" -->
 		<div id="walking" style="font-family: 'Ubuntu', sans-serif; color:grey; font-size:300%; text-align: right; float:right"></div>
 		<img src="https://i.gifer.com/5Q0v.gif" style="float:right; height:60px;" />
 	</div>
@@ -31,7 +31,7 @@
 		setInterval(function() {
 		    let now = new Date()
 			$('#time').empty().append(
-				("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2)
+				("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2) + ":" + ("0" + now.getSeconds()).slice(-2)
 			);
 			set_walking();
 			

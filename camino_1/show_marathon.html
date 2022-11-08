@@ -18,7 +18,7 @@
 		<div id="time" style="font-family: 'Ubuntu', sans-serif; color:grey; font-size:300%; text-align: right; float:right;"></div>
 		<img src="https://i.gifer.com/Z92m.gif" style="float: right; height: 60px;" />
 	</div>
-	<div style="visibility:hidden;">
+	<div id="ongoing">
 		<div id="walking" style="font-family: 'Ubuntu', sans-serif; color:grey; font-size:300%; text-align: right; float:right"></div>
 		<img src="https://i.gifer.com/5Q0v.gif" style="float:right; height:60px;" />
 	</div>
@@ -31,21 +31,33 @@
 		setInterval(function() {
 		    let now = new Date()
 			$('#time').empty().append(
-				("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2)
+				" Day " + Math. ceil((now.getTime() - new Date('2022-03-21').getTime()) / (1000 * 3600 * 24)) + " - " + ("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2)
 			);
 			set_walking();
 			
 		},1000);
 		
 		function getStatus(data, status) {
-			start_marathon = Date.parse(JSON.parse(data)['time']);
+			if(JSON.parse(data)['time'] != "Nothing") {
+				start_marathon = Date.parse(JSON.parse(data)['time']);
+			}
+			else {
+				start_marathon = "Nothing";
+			}
 		}
 		function set_walking() {
-			let d = Math.abs(new Date() - start_marathon);
-			let time = ("0" + Math.floor(d / (1000 * 60 * 60))).slice(-2) + ":" + ("0" + Math.floor(d / (1000 * 60)) % (60)).slice(-2) + ":" + ("0" + Math.floor(((d / 1000) % 60))).slice(-2);
-			$('#walking').empty().append(
-				time
-			);
+			console.log(start_marathon)
+			if(start_marathon == "Nothing") {
+				$('#ongoing').css("visibility", "hidden");
+			}
+			else {
+				$('#ongoing').css("visibility", "visible");
+				let d = Math.abs(new Date() - start_marathon);
+				let time = ("0" + Math.floor(d / (1000 * 60 * 60))).slice(-2) + ":" + ("0" + Math.floor(d / (1000 * 60)) % (60)).slice(-2) + ":" + ("0" + Math.floor(((d / 1000) % 60))).slice(-2);
+				$('#walking').empty().append(
+					time
+				);
+			}
 		}
 		
 	</script>

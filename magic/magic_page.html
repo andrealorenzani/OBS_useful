@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<style type="text/css">
+	html { 
+	  background: url(background2.jpg) no-repeat center center fixed; 
+	  -webkit-background-size: cover;
+	  -moz-background-size: cover;
+	  -o-background-size: cover;
+	  background-size: cover;
+	}
+</style>
+
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Forecast calculation</title>
+</head>
+<body> 
+	<div id="forms">
+		<div id="intro" style="width: 766px; position: absolute; text-align: center; color: white; display:none;">
+			<img src="banner_2.jpg" style="width: 766px"/>
+			<div style="position: absolute; top: 3%; right: 2%; width: 320px;">
+				<p><strong>Welcome to your future reading!!!</strong></p>
+				<p>This website does NOT use cookies and it does NOT store any data that is required for its working.</p>
+				<p>If the website is not currently working, you may want to have a postponed forecast, in that case only your email address and the result will be stored for as much as it is required.</p>
+				<p>No commercial ad will be sent or showed.</p>
+				<p>Click on the green botton to continue...</p>
+			</div>
+			<img class="accept" data-next="name_surname" src="accept.png" style="position: absolute; bottom: 5%; right: 20%; width: 40px;"/>
+		</div>
+		<div id="name_surname" style="width: 766px; position: absolute; text-align: center; color: white; display:none;">
+			<img src="banner_1.jpg" style="width: 766px" />
+			<div style="position: absolute; top: 25%; left: 2%; width:420px; height:75%;">
+				<p><strong>Tell me your name and surname!!!</strong></p>
+				<p><input type="text" name="nameSurname"></p>
+				<p><img class="accept" data-next="dob" src="accept.png" style="width: 40px;"/></p>
+			</div>
+		</div>
+		<div id="dob" style="width: 766px; position: absolute; text-align: center; color: white; display:none;">
+			<img src="banner_1.jpg" style="width: 766px" />
+			<div style="position: absolute; top: 25%; left: 2%; width:420px; height:75%;">
+				<p><strong>Tell me your date of birth!!!</strong></p>
+				<p><input type="date" name="dob"></p>
+				<p><img class="accept" data-next="prediction" src="accept.png" style="width: 40px;"/></p>
+			</div>
+		</div>
+		<div id="partner_name_surname" style="width: 766px; position: absolute; text-align: center; color: white; display:none;">
+			<img src="banner_1.jpg" style="width: 766px" />
+			<div style="position: absolute; top: 20%; left: 2%; width:420px; height:75%;">
+				<p><strong>Are you looking for a particular match?!?</strong></p>
+				<p><strong>In that case, put the name and surname. If you don't know the full name and surname, or if you don't look for a particular person, click on the red X</strong></p>
+				<p><input type="text" name="partnerNameSurname"></p>
+				<p><img class="accept" data-next="partner_dob" src="accept.png" style="width: 40px;"/></p>
+			</div>
+		</div>
+		<div id="partner_dob" style="width: 766px; position: absolute; text-align: center; color: white; display:none;">
+			<img src="banner_1.jpg" style="width: 766px" />
+			<div style="position: absolute; top: 25%; left: 2%; width:420px; height:75%;">
+				<p><strong>Tell me this person's date of birth, if you know it!!!</strong></p>
+				<p><input type="date" name="partnerDob"></p>
+				<p><img class="accept" data-next="predicting" src="accept.png" style="width: 40px;"/></p>
+			</div>
+		</div>
+		<div id="prediction" style="width: 766px; position: absolute; text-align: center; color: white; display:none;">
+			<img src="banner_1.jpg" style="width: 766px" />
+			<div style="position: absolute; top: 25%; left: 2%; width:420px; height:75%;">
+				<p><strong>Chose a topic among business, love, health and general!!!</strong></p>
+				<p>
+					<img class="accept" data-next="predicting" src="money.png" data-value="business" style="height: 55px; padding: 10px;"/>
+					<img class="accept" data-next="partner_name_surname" src="heart.png" data-value="love" style="height: 55px; padding: 10px;"/>
+					<img class="accept" data-next="predicting" src="health.png" data-value="health" style="height: 55px; padding: 10px;"/>
+					<img class="accept" data-next="predicting" src="life.png" data-value="general" style="height: 55px; padding: 10px;"/>
+				</p>
+			</div>
+		</div>
+		<div id="predicting" data-function="waitResult" style="width: 766px; position: absolute; text-align: center; color: white; display:none;">
+			<img src="banner_1.jpg" style="width: 766px" />
+			<div style="position: absolute; top: 25%; left: 2%; width:420px; height:75%;">
+				<p><strong>I am asking my tarots...</strong></p>
+			</div>
+		</div>
+		<div id="result" data-function="display" data-next="result" style="width: 766px; position: absolute; text-align: center; color: white; display:none;">
+			<img src="banner_1.jpg" style="width: 766px" />
+			<div class="content" style="position: absolute; top: 10%; left: 2%; width:420px; height:75%;">
+			</div>
+		</div>
+	</div>
+	<script>
+		var data = {};
+		var result = {};
+
+		$( document ).ready(function() {
+
+			$("#forms > div").hide();
+
+			$('#forms').ready(function() {
+				var first = $('#forms > div:first');
+				showPanel(first);
+			} );
+		});
+
+		function waitResult(panel) {
+			showPanel(panel);
+			sendData(function () { 
+				setTimeout(function(){
+				console.log(result);
+				hideAndShow(panel, $( '#result' ) )
+			}, 1000); });
+		}
+
+		function display(panel) {
+			var value = Object.keys(result)[0];
+			panel.find('.content').empty();
+			for(item in result[value]) {
+				panel.find('.content').append('<p>'+result[value][item]+'</p>');
+			}
+			panel.find('.content').append('<p><img class="accept" data-next="result" src="accept.png" style="height: 55px; padding: 10px;"/></p>')
+			delete result[value];
+			if(Object.keys(result).length == 0){
+				panel.find('.accept').attr('data-next', 'name_surname')
+			}
+			showPanel(panel);
+		}
+
+		function sendData(func){
+			/*$.post( "test.php", data)
+			  .done(function (returndata) {
+			  	data = {};
+			  	result = returndata;
+			  	func();
+			  });*/
+
+			result = { 
+						'affinity': { 'value': 'Your shared common affinity is 76%'},
+						'a': { 'b': 'This is new' }
+					};
+			func();
+		}
+
+		function showPanel(panel) {
+			var panelWidth = panel.width();
+			var totalWidth = $( document ).width();
+			var panelheight = panel.height();
+			var totalHeight = $( document ).height();
+			totalHeight = totalHeight>panelheight? totalHeight : panelheight;
+			totalWidth = totalWidth>panelWidth? totalWidth : panelWidth;
+			var positionh = (((totalHeight - panelheight)*50)/totalHeight)+'%';
+			var positionw = (((totalWidth - panelWidth)*50)/totalWidth)+'%';
+			panel.parent().css('height', totalHeight+'px');
+			panel.css({'left':'-'+panelWidth+'px', 'top':positionh, 'opacity': 0});
+			panel.show();
+			panel.animate({left: positionw, 'opacity': 1},750);
+			panel.find('.accept').click(function() {
+				if ($( this ).attr('data-value')) {
+					data[panel.attr('id')] = $( this ).attr('data-value');
+				}
+				panel.find('input').each(function () {
+					data[$( this ).attr('name')] = $( this ).val();
+				});
+			  	hideAndShow(panel, $( '#'+$( this ).attr('data-next') ) );
+			})
+		}
+
+		function hideAndShow(hideP, showP) {
+			var totalPosition = hideP.parent().width();
+			hideP.stop().animate({left: totalPosition+'px', 'opacity': 0},750, function() {
+				if (showP.attr('data-function')) {
+					var funName = showP.attr('data-function');
+					window[funName](showP);
+				}
+				else {
+					showPanel(showP);
+				}
+			});
+		}
+		
+	</script>
+
+</body>
+</html>

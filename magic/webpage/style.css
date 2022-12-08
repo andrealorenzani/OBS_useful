@@ -1,0 +1,40 @@
+html { 
+	  background: url(background2.jpg) no-repeat center center fixed; 
+	  -webkit-background-size: cover;
+	  -moz-background-size: cover;
+	  -o-background-size: cover;
+	  background-size: cover;
+	  font-size: 16px;
+	}
+
+div.server_status {
+	position: absolute; top:3%; left: 2%;
+}
+
+p.server_status_prefix {
+	margin: 0px; padding-left: 4px; font-size: x-small; color:white; display: inline-block;
+}
+
+p.server_status_text {
+	color:lightgreen; display:inline; font-size: x-small;
+}
+
+img.server_status_img {
+	width:20px; float:left; vertical-align: middle;
+}
+
+div.state, div.initialstate{
+	width: 766px; position: absolute; text-align: center; color: white; display:none;
+}
+
+.initialstate > .state_content {
+	position: absolute; top: 3%; right: 2%; width: 320px;
+}
+
+.state > .state_content {
+	position: absolute; top: 20%; left: 2%; width:420px; height:75%;
+}
+
+.state > .state_content_smaller {
+	position: absolute; top: 1%; left: 2%; width:420px; height:75%;
+}

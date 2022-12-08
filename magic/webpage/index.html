@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<link rel="stylesheet" href="style.css">
+<style type="text/css">
+	
+</style>
+
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script src="lorenzani_future.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Forecast calculation</title>
+</head>
+<body>
+	<div class="server_status" >
+		<p class="server_status_prefix">The server is </p> 
+		<p class="server_status_text">up</p>
+		<img class="server_status_img" /> 
+	</div>
+	<div id="forms">
+		<div class="initialstate" id="intro">
+			<img src="banner_2.jpg" style="width: 766px"/>
+			<div class="state_content">
+				<p><strong>Welcome to your future reading!!!</strong></p>
+				<p>This website does NOT use cookies and it does NOT store any data that is required for its working.</p>
+				<p>If the website is not currently working, you may want to have a postponed forecast, in that case only your email address and the result will be stored for as much as it is required.</p>
+				<p>No commercial ad will be sent or showed.</p>
+				<p>Click on the green botton to continue...</p>
+			</div>
+			<img class="accept" data-next="name_surname" src="accept.png" style="position: absolute; bottom: 5%; right: 20%; width: 40px;"/>
+			<div class="curr_server_status" style="position: absolute; bottom:1%; right: 1%;">
+				<p class="server_status_prefix">The server is </p> 
+				<p class="server_status_text">up</p>
+				<img class="server_status_img" /> 
+			</div>
+		</div>
+		<div class="state" id="name_surname" data-function="clear">
+			<div class="state_content">
+				<p><strong>Tell me your name and surname!!!</strong></p>
+				<p><input type="text" name="nameSurname"></p>
+				<p><img class="accept" data-next="dob" src="accept.png" style="width: 40px;"/></p>
+			</div>
+		</div>
+		<div class="state" id="dob">
+			<div class="state_content">
+				<p><strong>Tell me your date of birth!!!</strong></p>
+				<p><input type="date" name="dob"></p>
+				<p><img class="accept" data-next="prediction" src="accept.png" style="width: 40px;"/></p>
+			</div>
+		</div>
+		<div class="state" id="partner_name_surname">
+			<div class="state_content">
+				<p><strong>Are you looking for a particular match?!?</strong></p>
+				<p><strong>In that case, put the name and surname. If you don't know the full name and surname, or if you don't look for a particular person, click on the red X</strong></p>
+				<p><input type="text" name="partnerNameSurname"></p>
+				<p>
+					<img class="accept" data-next="predicting" src="reject.png" style="width: 40px; display: inline"/>
+					<img class="accept" data-next="partner_dob" src="accept.png" style="width: 40px; display: inline"/>
+				</p>
+			</div>
+		</div>
+		<div class="state" id="partner_dob">
+			<div class="state_content">
+				<p><strong>Tell me this person's date of birth, if you know it!!!</strong></p>
+				<p><input type="date" name="partnerDob"></p>
+				<p><img class="accept" data-next="predicting" src="accept.png" style="width: 40px;"/></p>
+			</div>
+		</div>
+		<div class="state" id="prediction">
+			<div class="state_content">
+				<p><strong>Chose a topic among business, love, health and general!!!</strong></p>
+				<p>
+					<img class="accept" data-next="predicting" src="money.png" data-value="business" style="height: 55px; padding: 10px;"/>
+					<img class="accept" data-next="partner_name_surname" src="heart.png" data-value="love" style="height: 55px; padding: 10px;"/>
+					<img class="accept" data-next="predicting" src="health.png" data-value="health" style="height: 55px; padding: 10px;"/>
+					<img class="accept" data-next="predicting" src="life.png" data-value="general" style="height: 55px; padding: 10px;"/>
+				</p>
+			</div>
+		</div>
+		<div class="state" id="email">
+			<div class="state_content_smaller">
+				<p><strong>Apparently, I cannot tell your future right now...</strong></p>
+				<p>Insert your email if you want to receive the result</p>
+				<p>Please consider that <strong>no personal  information will be stored</strong> in the result, therefore you are allowed to request one notification only, for one result. You will need to remember which information you have provided in order to understand the result</p>
+				<p>Click on the red cross if you want to ask for a different prediction</p> 
+				<p><input type="email" name="email">
+					<img class="accept" data-next="partner_dob" src="accept.png" style="vertical-align: middle;padding-left: 30px;width: 20px; display: inline"/>
+				<p>
+					<img class="accept" data-next="name_surname" src="reject.png" style="width: 40px; display: inline"/>
+				</p>
+			</div>
+		</div>
+		<div class="state" id="predicting" data-function="waitResult">
+			<div class="state_content">
+				<p><strong>I am asking my tarots...</strong></p>
+			</div>
+		</div>
+		<div class="state" id="result" data-function="display" data-next="result">
+			<div class="state_content">
+			</div>
+		</div>
+	</div>
+	
+
+</body>
+</html>

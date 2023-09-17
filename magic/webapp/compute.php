@@ -3,7 +3,7 @@
 $responseJson = [];
 $responseCode = 200;
 
-$SERVER_ADDR= "https://supermaestro-uk.duckdns.org:8999/";
+$SERVER_ADDR= "magic.andrea.lorenzani.name/cgi-bin/tarots.py";
 
 function remove_accents($string) {
     if ( !preg_match('/[\x80-\xff]/', $string) )
@@ -112,9 +112,9 @@ function remove_accents($string) {
 }
 
 function pingServer() {
-	$cURLConnection = curl_init();
+	$cURLConnection = curl_init($GLOBALS['SERVER_ADDR']);
 
-	curl_setopt($cURLConnection, CURLOPT_URL, $SERVER_ADDR);
+	curl_setopt($cURLConnection, CURLOPT_URL, $GLOBALS['SERVER_ADDR']);
 	curl_setopt($cURLConnection, CURLOPT_RETURNTRANSFER, true);
 
 	$returnVal = curl_exec($cURLConnection);
@@ -124,17 +124,21 @@ function pingServer() {
 }
 
 function sendData($data) {
-	$ch = curl_init();
+	$ch = curl_init($GLOBALS['SERVER_ADDR']);
 
-	curl_setopt($ch, CURLOPT_URL,$SERVER_ADDR);
+	curl_setopt($ch, CURLOPT_URL,$GLOBALS['SERVER_ADDR']);
 	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_POSTFIELDS,
-	            http_build_query(array($data)));
+
+	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data ));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 
 	// Receive server response ...
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 	$server_output = curl_exec($ch);
+    header("x-request-res: $server_output");
+    $info = json_encode(curl_getinfo($ch));
+    header("x-request-curl: $info");
 
 	curl_close ($ch);
 	return $server_output;
@@ -151,15 +155,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach($data as $key => $value) {
         $data[$key] = preg_replace('/[^a-zA-Z0-9 \-\/]/', '', $value);
     }
-    $json = json_encode($data);
     
 	if($data['prediction'] != NULL) {
-        header("x-request: $json");
-        $responseJson = $data;
-		/* $responseJson = json_decode('{ 
-				"affinity": { "value": "Your shared common affinity is 76%"},
-				"a": { "b": "This is new" }
-			}'); */
+        $responseJson = sendData($data);
 	}
     else {
         $responseJson = $data;
@@ -173,10 +171,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     	$responseCode = 500;
     	$responseJson = array("error" => "Server down");
     }
+    $responseJson = json_encode( $responseJson );
 }
 
 header('Content-type: application/json');
-http_response_code($responseCode);
-echo json_encode( $responseJson );
+echo $responseJson;
 
 ?>

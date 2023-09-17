@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+	<script
+	  src="https://code.jquery.com/jquery-3.6.1.slim.min.js"
+	  integrity="sha256-w8CvhFs7iHNVUtnSP0YKEg00p9Ih13rlL9zGqvLdePA="
+	  crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Today's Date</title>
+</head>
+
+<body>
+	<iframe id="video" width="560" height="315" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+	<script>
+		// YYYY-MM-DDTHH:mm:ss.sssZ
+		function getSearchParams(k){
+			var p={};
+			location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(s,k,v){p[k]=p[k]?p[k].concat([v]):[v]})
+			return (k&&p[k])?p[k]:[];
+		}
+		function shuffle(array) {
+		  var currentIndex = array.length,  randomIndex;
+
+		  // While there remain elements to shuffle...
+		  while (0 !== currentIndex) {
+
+			// Pick a remaining element...
+			randomIndex = Math.floor(Math.random() * currentIndex);
+			currentIndex--;
+
+			// And swap it with the current element.
+			[array[currentIndex], array[randomIndex]] = [
+			  array[randomIndex], array[currentIndex]];
+		  }
+
+		  return array;
+		}
+		function displayVideo(code) {
+			let url = 'https://www.youtube.com/embed/' + code + '?autoplay=1&controls=0&modestbranding=1&enablejsapi=1&loop=1';
+			$('#video').attr('src', url);
+		}
+		function set_walking() {
+			// ?video=8dyx3q5fKoo
+			let video = getSearchParams('video');
+			if (video.length > 1) {
+				video = shuffle(video);
+				setInterval(set_walking, 65000);
+			}
+			video[0]? displayVideo(video[0]):null;
+		}
+		set_walking();
+		
+	</script>
+
+</body>
+
+</html>

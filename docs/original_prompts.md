@@ -59,3 +59,37 @@ Append-only log of the user's original prompts, verbatim, most recent last. Appe
 >
 > This is the first task for you. Feel free to ask my any question to clarify, but don't do
 > that if it is not strictly needed for solving ambiguities
+
+## 2026-09-02 — First release: five live overlay effects
+
+### Original request (start of task)
+
+> This is the first real feature set for OBS_director (currently greenfield: only docs/ seed files exist, no code, no framework chosen yet — see docs/product.md and docs/architecture.md for the current "undecided" state). Drive this from idea to implemented-and-documented code, per your normal process (product-owner, architect, developer, tester agents → composed plan → advisor sanity check → resolve open questions, asking the user only when truly necessary → implementer → documenter).
+>
+> The user wants FIVE features built together as one coherent first release, all controllable from the `admin` page and rendered on the `screen` page (transparent OBS Browser Source overlay). Exact user request, verbatim:
+>
+> 1. **Speaker presentation**: Admin can set up a list of speakers (persisted, reusable across sessions). Each speaker has a full name (large, majority of the banner) and a smaller description/title ("who he is"); if description is missing, default it sensibly from the name. From the admin, operator selects a speaker AND a screen side (left or right). On selection, a fancy bar animates in from that side, then the name materializes on it (entrance direction must match the selected side). The banner stays until: the speaker is deselected in admin, OR a different speaker is selected — in which case the current one animates out before the new one animates in (never both on screen at once on that side).
+>
+> 2. **Community message**: Two input paths feeding the same on-screen animated display: (a) read/import messages from a free-to-access social account (X, Discord, Facebook, WhatsApp, etc.) and let the operator search/pick one from what could be a huge list; (b) a free-text field to paste/write a custom message plus a selector for which social platform's visual style to simulate. Either path results in the message being shown on screen with a nice entrance animation, styled to look like the chosen/source social platform.
+>
+> 3. **WhatsApp discussion simulator**: Admin lets the operator author one or more named conversations ahead of time. Each conversation is a named list of messages; each message is tagged as arriving from the left (incoming, shows a sender name) or right (outgoing/"me", shows timestamp + blue double-check marks). Selecting a saved conversation in admin makes it take over the full screen and animates the messages in one by one as if arriving live.
+>
+> 4. **Timers**: Be creative. Support at least: a big centered timer and a corner (bottom-right or top-right) timer. Support simple countdown-to-zero, and also count from a set start point to a set end point (i.e., configurable start/end, not just count-up-from-zero or countdown-from-N). Operator controls placement/mode/values from admin.
+>
+> 5. **Big red alarm**: A bold, attention-grabbing red alarm banner/effect, centered at bottom or top of the screen, in the spirit of a loud "whining" alert — operator triggers/dismisses it from admin.
+>
+> Admin UX constraint (explicit from the user): it's fine to have multiple admin pages/sections for *preparing* content ahead of time (setting up the speaker list, writing whatsapp conversations, configuring timers, composing alarms). But everything the operator actually *does live during a stream* — selecting/deselecting a prepared speaker+side, pasting or picking a community message and its style, launching a prepared whatsapp conversation, starting/stopping/configuring a timer, triggering/dismissing the alarm — must be reachable from one single, minimal, clear "live control" admin page. Don't make the operator hunt across pages mid-stream.
+>
+> Since the web framework, real-time push channel (websockets/SSE/polling), and project layout are all still open architecture questions per docs/architecture.md, have the architect agent make and justify concrete choices as part of this change — don't leave them open. Multiple concurrent effects (speaker banner + community message + timer + alarm all live at once, on independent layers) should be supported since these are visually distinct screen regions that could reasonably be shown together.
+>
+> Use AskUserQuestion sparingly and only for genuine product decisions you can't reasonably default (e.g., if there's a real fork in direction for the social-message import mechanism given "any free to access social media" is vague, or persistence choice, etc.) — otherwise make sensible calls and proceed, consistent with how you normally operate.
+
+### Clarifying answers given by the user during plan resolution
+
+> User answers to all three open questions — proceed to finalize the plan and implement:
+>
+> 1. Speaker banner model: Two independent per-side slots (Option B), CONFIRMED — but with one added requirement: if the opposite side's slot is empty, the occupied side's banner should take up most of the screen width (i.e. banner width is dynamic — a lone speaker gets a wide/prominent banner, but if both sides are occupied simultaneously, each banner narrows to share the screen with the other side). Both slots' animations (enter/exit, materialize) still work exactly as previously designed per-side.
+>
+> 2. Community message import: Option C — skip real import for v1. Build the provider interface/abstraction so a real platform can be plugged in later, but ship with no concrete provider wired up (search returns no results for now). The free-text-plus-platform-style path must be fully functional.
+>
+> 3. Big red alarm: Option B — include real siren audio via Web Audio, played through the browser tab. Handle browser autoplay restrictions sensibly (e.g. trigger only on an explicit admin action, which counts as a user-gesture-adjacent trigger from the operator's perspective — document that OBS needs to be configured to capture that Browser Source's audio track for the siren to be heard in the stream/recording).

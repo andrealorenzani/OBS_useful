@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Alarm presets — OBS_director{% endblock %}
+{% block content %}
+  <h1>Alarm presets</h1>
+  <p class="hint">Optional prep step (Deep Dive Q9) — save a label ahead of time, or just type
+    one ad hoc on the <a href="/admin/live">Live control</a> page when you trigger the alarm.</p>
+
+  <form id="alarm-preset-form" class="card">
+    <h2>New preset</h2>
+    <label>Label <input type="text" name="label" required placeholder="e.g. TECHNICAL ISSUE"></label>
+    <button type="submit">Save preset</button>
+  </form>
+
+  <ul id="alarm-preset-list" class="entity-list">
+    {% for preset in alarm_presets %}
+      <li data-id="{{ preset.id }}">
+        <strong>{{ preset.label }}</strong>
+        <button class="danger" data-action="delete">Delete</button>
+      </li>
+    {% else %}
+      <li class="empty">No presets yet — the live page falls back to a default alarm.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
+{% block scripts %}
+  <script src="/static/admin/alarms.js"></script>
+{% endblock %}

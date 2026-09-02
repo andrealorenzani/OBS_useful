@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Speakers — OBS_director{% endblock %}
+{% block content %}
+  <h1>Speaker roster</h1>
+  <p class="hint">Prep page — build the reusable roster ahead of time. Selecting a speaker
+    live happens on the <a href="/admin/live">Live control</a> page.</p>
+
+  <form id="speaker-form" class="card">
+    <h2>Add speaker</h2>
+    <label>Name <input type="text" name="name" required></label>
+    <label>Description (optional) <input type="text" name="description"></label>
+    <button type="submit">Add speaker</button>
+  </form>
+
+  <ul id="speaker-list" class="entity-list">
+    {% for speaker in speakers %}
+      <li data-id="{{ speaker.id }}">
+        <strong>{{ speaker.name }}</strong>
+        {% if speaker.description %}<span class="muted"> — {{ speaker.description }}</span>{% endif %}
+        <button class="danger" data-action="delete">Delete</button>
+      </li>
+    {% else %}
+      <li class="empty">No speakers yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
+{% block scripts %}
+  <script src="/static/admin/speakers.js"></script>
+{% endblock %}

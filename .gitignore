@@ -129,3 +129,7 @@ dmypy.json
 .pyre/
 *.pem
 **/*.pem
+
+# OBS_director runtime data (JSON-file persistence) - keep dir, ignore contents
+/data/*.json
+!/data/.gitkeep

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}WhatsApp scripts — OBS_director{% endblock %}
+{% block content %}
+  <h1>WhatsApp conversations</h1>
+  <p class="hint">Prep page — author named, ordered scripts here. Launch them live from the
+    <a href="/admin/live">Live control</a> page.</p>
+
+  <form id="conversation-form" class="card">
+    <h2>New conversation</h2>
+    <label>Name <input type="text" name="name" required></label>
+    <button type="submit">Create conversation</button>
+  </form>
+
+  <div id="conversation-list">
+    {% for convo in conversations %}
+      <details class="card conversation" data-id="{{ convo.id }}">
+        <summary>{{ convo.name }} ({{ convo.messages|length }} messages)
+          <button class="danger" data-action="delete-conversation">Delete conversation</button>
+        </summary>
+
+        <ol class="message-list">
+          {% for message in convo.messages %}
+            <li data-id="{{ message.id }}" class="message message--{{ message.direction }}">
+              <span class="badge">{{ message.direction }}</span>
+              {% if message.direction == 'left' %}<strong>{{ message.sender_name or '(no sender)' }}</strong>{% endif %}
+              <span>{{ message.body }}</span>
+              {% if message.direction == 'right' and message.timestamp_label %}<span class="muted">{{ message.timestamp_label }}</span>{% endif %}
+              <button class="danger" data-action="delete-message">Delete</button>
+            </li>
+          {% else %}
+            <li class="empty">No messages yet.</li>
+          {% endfor %}
+        </ol>
+
+        <form class="add-message-form" data-conversation-id="{{ convo.id }}">
+          <select name="direction">
+            <option value="left">Incoming (left)</option>
+            <option value="right">Outgoing (right)</option>
+          </select>
+          <input type="text" name="sender_name" placeholder="Sender name (incoming only)">
+          <input type="text" name="body" placeholder="Message text" required>
+          <input type="text" name="timestamp_label" placeholder="Timestamp label (outgoing only, e.g. 10:42)">
+          <button type="submit">Add message</button>
+        </form>
+      </details>
+    {% else %}
+      <p class="empty">No conversations yet.</p>
+    {% endfor %}
+  </div>
+{% endblock %}
+{% block scripts %}
+  <script src="/static/admin/whatsapp.js"></script>
+{% endblock %}

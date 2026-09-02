@@ -1,0 +1,43 @@
+.region--timer-big {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.region--timer-big .timer-display {
+  font-size: 6rem;
+  font-weight: 800;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+.region--timer-corner {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.region--timer-corner.pos-top-right {
+  top: 3vh;
+  right: 3vw;
+}
+
+.region--timer-corner.pos-bottom-right {
+  bottom: 3vh;
+  right: 3vw;
+}
+
+.timer-display {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.3em 0.6em;
+  border-radius: 0.4em;
+}
+
+.timer-display--complete {
+  animation: timer-complete-flash 0.6s ease-in-out 2;
+  color: #ffd23b;
+}
+
+@keyframes timer-complete-flash {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}

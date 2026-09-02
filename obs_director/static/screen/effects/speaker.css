@@ -1,0 +1,102 @@
+.region--speaker-left {
+  left: 0;
+  bottom: 6vh;
+  transition: width 0.4s ease;
+}
+
+.region--speaker-right {
+  right: 0;
+  bottom: 6vh;
+  text-align: right;
+  transition: width 0.4s ease;
+}
+
+/* Dynamic width (Deep Dive Q1): lone occupied side is wide/prominent,
+   both-occupied narrows to roughly share the screen. The transition on the
+   region itself (above) is what makes this animate smoothly rather than
+   jump-cut. */
+.region--speaker.wide {
+  width: 70vw;
+}
+
+.region--speaker.narrow {
+  width: 46vw;
+}
+
+.speaker-banner {
+  display: inline-block;
+  margin: 0 4vw;
+  padding: 1.2rem 2rem;
+  background: rgba(10, 10, 20, 0.72);
+  border-radius: 0.5rem;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.speaker-banner--left {
+  border-left: 6px solid #3ba7ff;
+}
+
+.speaker-banner--right {
+  border-right: 6px solid #ff6a3b;
+}
+
+.speaker-banner__name {
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.speaker-banner__description {
+  font-size: 1.2rem;
+  opacity: 0.85;
+  margin-top: 0.2rem;
+}
+
+/* Entrance direction matches the side. */
+.speaker-banner--left.speaker-banner--enter {
+  animation: speaker-slide-in-left 0.45s ease-out;
+}
+
+.speaker-banner--right.speaker-banner--enter {
+  animation: speaker-slide-in-right 0.45s ease-out;
+}
+
+.speaker-banner--left.speaker-banner--exit {
+  animation: speaker-slide-out-left 0.35s ease-in forwards;
+}
+
+.speaker-banner--right.speaker-banner--exit {
+  animation: speaker-slide-out-right 0.35s ease-in forwards;
+}
+
+@keyframes speaker-slide-in-left {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes speaker-slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes speaker-slide-out-left {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-100%); opacity: 0; }
+}
+
+@keyframes speaker-slide-out-right {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+/* The name "materializes" as a distinct beat after the banner slides in
+   (not just a plain fade): a brief scale+opacity pop, slightly delayed. */
+.speaker-banner__name--materialize {
+  animation: speaker-materialize 0.35s ease-out 0.25s both;
+}
+
+@keyframes speaker-materialize {
+  from { transform: scale(0.85); opacity: 0; letter-spacing: 0.1em; }
+  to { transform: scale(1); opacity: 1; letter-spacing: normal; }
+}

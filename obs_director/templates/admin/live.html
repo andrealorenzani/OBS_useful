@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Live control — OBS_director{% endblock %}
+{% block content %}
+  <h1>Live control</h1>
+  <p class="hint">Everything the operator needs mid-stream lives on this one page.</p>
+
+  <section class="card live-section" id="speaker-section">
+    <h2>Speaker banners</h2>
+    <div class="side-by-side">
+      <div class="live-block" data-side="left">
+        <h3>Left</h3>
+        <select data-role="speaker-select">
+          <option value="">— choose a speaker —</option>
+          {% for speaker in speakers %}
+            <option value="{{ speaker.id }}">{{ speaker.name }}</option>
+          {% endfor %}
+        </select>
+        <button data-action="speaker-show" data-side="left">Show on left</button>
+        <button class="danger" data-action="speaker-clear" data-side="left">Clear left</button>
+      </div>
+      <div class="live-block" data-side="right">
+        <h3>Right</h3>
+        <select data-role="speaker-select">
+          <option value="">— choose a speaker —</option>
+          {% for speaker in speakers %}
+            <option value="{{ speaker.id }}">{{ speaker.name }}</option>
+          {% endfor %}
+        </select>
+        <button data-action="speaker-show" data-side="right">Show on right</button>
+        <button class="danger" data-action="speaker-clear" data-side="right">Clear right</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card live-section" id="community-message-section">
+    <h2>Community message</h2>
+    <form id="community-search-form">
+      <h3>Import (search)</h3>
+      <select name="platform">
+        {% for p in platforms %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+      </select>
+      <input type="text" name="q" placeholder="Search query">
+      <button type="submit">Search</button>
+      <div id="community-search-results" class="search-results"></div>
+    </form>
+
+    <form id="community-custom-form">
+      <h3>Compose (custom text)</h3>
+      <select name="platform">
+        {% for p in platforms %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+      </select>
+      <input type="text" name="author" placeholder="Author name" value="You">
+      <textarea name="text" placeholder="Message text" required></textarea>
+      <button type="submit">Show on screen</button>
+    </form>
+    <button class="danger" data-action="community-clear">Dismiss community message</button>
+  </section>
+
+  <section class="card live-section" id="whatsapp-section">
+    <h2>WhatsApp simulator</h2>
+    <select id="whatsapp-conversation-select">
+      <option value="">— choose a conversation —</option>
+      {% for convo in conversations %}
+        <option value="{{ convo.id }}">{{ convo.name }} ({{ convo.messages|length }} messages)</option>
+      {% endfor %}
+    </select>
+    <button data-action="whatsapp-play">Play conversation</button>
+    <button class="danger" data-action="whatsapp-stop">Stop / dismiss</button>
+  </section>
+
+  <section class="card live-section" id="timer-section">
+    <h2>Timers</h2>
+    <div class="side-by-side">
+      <div class="live-block" data-timer="big">
+        <h3>Big / centered</h3>
+        <label>Start (s) <input type="number" data-role="timer-start" value="60"></label>
+        <label>End (s) <input type="number" data-role="timer-end" value="0"></label>
+        <button data-action="timer-start" data-timer="big">Start</button>
+        <button data-action="timer-pause" data-timer="big">Pause</button>
+        <button data-action="timer-reset" data-timer="big">Reset</button>
+        <button class="danger" data-action="timer-clear" data-timer="big">Hide</button>
+      </div>
+      <div class="live-block" data-timer="corner">
+        <h3>Corner</h3>
+        <label>Start (s) <input type="number" data-role="timer-start" value="0"></label>
+        <label>End (s) <input type="number" data-role="timer-end" value="300"></label>
+        <label>Position
+          <select data-role="timer-position">
+            <option value="top-right">Top right</option>
+            <option value="bottom-right">Bottom right</option>
+          </select>
+        </label>
+        <button data-action="timer-start" data-timer="corner">Start</button>
+        <button data-action="timer-pause" data-timer="corner">Pause</button>
+        <button data-action="timer-reset" data-timer="corner">Reset</button>
+        <button class="danger" data-action="timer-clear" data-timer="corner">Hide</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card live-section" id="alarm-section">
+    <h2>Big red alarm</h2>
+    <select id="alarm-preset-select">
+      <option value="">— default alarm —</option>
+      {% for preset in alarm_presets %}
+        <option value="{{ preset.label }}">{{ preset.label }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" id="alarm-custom-label" placeholder="Or type a custom label">
+    <select id="alarm-position">
+      <option value="top">Top</option>
+      <option value="bottom">Bottom</option>
+    </select>
+    <button data-action="alarm-trigger">Trigger alarm</button>
+    <button class="danger" data-action="alarm-dismiss">Dismiss alarm</button>
+  </section>
+{% endblock %}
+{% block scripts %}
+  <script src="/static/admin/live.js"></script>
+{% endblock %}

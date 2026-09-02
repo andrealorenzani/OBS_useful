@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}OBS_director{% endblock %}</title>
+  <link rel="stylesheet" href="/static/admin/admin.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <nav class="admin-nav">
+    <a href="/admin/live" class="admin-nav__brand">OBS_director</a>
+    <div class="admin-nav__links">
+      <a href="/admin/live">Live control</a>
+      <a href="/admin/speakers">Speakers</a>
+      <a href="/admin/whatsapp">WhatsApp scripts</a>
+      <a href="/admin/alarms">Alarm presets</a>
+      <a href="/screen" target="_blank" rel="noopener">Open screen ↗</a>
+    </div>
+  </nav>
+  <main class="admin-main">
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

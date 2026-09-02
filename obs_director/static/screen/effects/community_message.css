@@ -1,0 +1,46 @@
+.region--community-message {
+  top: 6vh;
+  right: 3vw;
+  max-width: 32vw;
+}
+
+.community-card {
+  padding: 1rem 1.2rem;
+  border-radius: 0.9rem;
+  background: rgba(20, 20, 20, 0.85);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+.community-card__header {
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.community-card__body {
+  font-size: 1.05rem;
+  overflow-wrap: break-word;
+}
+
+/* Lightweight "in the spirit of" platform theming. */
+.platform-x { border-left: 5px solid #ffffff; }
+.platform-discord { border-left: 5px solid #5865f2; background: rgba(88, 101, 242, 0.25); }
+.platform-facebook { border-left: 5px solid #1877f2; background: rgba(24, 119, 242, 0.22); }
+.platform-whatsapp { border-left: 5px solid #25d366; background: rgba(37, 211, 102, 0.2); border-radius: 1.1rem; }
+
+.community-card--enter {
+  animation: community-slide-in 0.4s ease-out;
+}
+
+.community-card--exit {
+  animation: community-slide-out 0.3s ease-in forwards;
+}
+
+@keyframes community-slide-in {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes community-slide-out {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-30px); opacity: 0; }
+}

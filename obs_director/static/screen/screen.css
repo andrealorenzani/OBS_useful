@@ -1,0 +1,44 @@
+/* screen.css — the single most important property of this page is that it
+   stays transparent, since it's composited as an OBS Browser Source on top
+   of whatever else is in the scene. Do not set an opaque background on
+   html/body or any full-viewport element here or in any effect CSS file. */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  background: transparent;
+  overflow: hidden;
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+  color: #fff;
+}
+
+.region {
+  position: fixed;
+  pointer-events: none;
+}
+
+/* Static z-index stack, lowest first: timers, speaker banners, community
+   message, whatsapp full-screen takeover, alarm (topmost). */
+.region--timer-big,
+.region--timer-corner {
+  z-index: 10;
+}
+
+.region--speaker-left,
+.region--speaker-right {
+  z-index: 20;
+}
+
+.region--community-message {
+  z-index: 30;
+}
+
+.region--whatsapp {
+  z-index: 40;
+}
+
+.region--alarm {
+  z-index: 50;
+}

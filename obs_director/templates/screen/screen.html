@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>OBS_director — screen</title>
+  <link rel="stylesheet" href="/static/screen/screen.css">
+  <link rel="stylesheet" href="/static/screen/effects/speaker.css">
+  <link rel="stylesheet" href="/static/screen/effects/community_message.css">
+  <link rel="stylesheet" href="/static/screen/effects/whatsapp.css">
+  <link rel="stylesheet" href="/static/screen/effects/timer.css">
+  <link rel="stylesheet" href="/static/screen/effects/alarm.css">
+</head>
+<body>
+  <!--
+    Fixed-position regions, one per effect family. Static z-index stack
+    (lowest first): timers < speaker banners < community message < whatsapp
+    full-screen takeover < alarm (topmost, most attention-grabbing).
+  -->
+  <div id="timer-big-region" class="region region--timer-big"></div>
+  <div id="timer-corner-region" class="region region--timer-corner"></div>
+
+  <div id="speaker-left-region" class="region region--speaker region--speaker-left"></div>
+  <div id="speaker-right-region" class="region region--speaker region--speaker-right"></div>
+
+  <div id="community-message-region" class="region region--community-message"></div>
+
+  <div id="whatsapp-region" class="region region--whatsapp"></div>
+
+  <div id="alarm-region" class="region region--alarm"></div>
+
+  <script src="/static/screen/ws-client.js"></script>
+  <script src="/static/screen/effects/speaker.js"></script>
+  <script src="/static/screen/effects/community_message.js"></script>
+  <script src="/static/screen/effects/whatsapp.js"></script>
+  <script src="/static/screen/effects/timer.js"></script>
+  <script src="/static/screen/effects/alarm.js"></script>
+  <script src="/static/screen/screen.js"></script>
+</body>
+</html>

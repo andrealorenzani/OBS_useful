@@ -1,0 +1,32 @@
+.region--alarm {
+  left: 0;
+  width: 100vw;
+  text-align: center;
+}
+
+.region--alarm-top {
+  top: 2vh;
+}
+
+.region--alarm-bottom {
+  bottom: 2vh;
+}
+
+.alarm-banner {
+  display: inline-block;
+  padding: 1rem 3rem;
+  background: #cc0000;
+  color: #fff;
+  font-size: 2.4rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 0.4rem;
+  box-shadow: 0 0 40px rgba(255, 0, 0, 0.8);
+  animation: alarm-pulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes alarm-pulse {
+  from { transform: scale(1); box-shadow: 0 0 20px rgba(255, 0, 0, 0.6); }
+  to { transform: scale(1.05); box-shadow: 0 0 60px rgba(255, 0, 0, 1); }
+}

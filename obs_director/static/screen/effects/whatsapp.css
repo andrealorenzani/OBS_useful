@@ -1,0 +1,66 @@
+.region--whatsapp {
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.whatsapp-panel {
+  width: 60vw;
+  max-height: 90vh;
+  background: rgba(11, 20, 26, 0.85);
+  border-radius: 0.8rem 0.8rem 0 0;
+  padding: 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.whatsapp-panel__messages {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.whatsapp-message {
+  max-width: 70%;
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.8rem;
+  animation: whatsapp-arrive 0.35s ease-out;
+}
+
+.whatsapp-message--left {
+  align-self: flex-start;
+  background: #202c33;
+  border-bottom-left-radius: 0.1rem;
+}
+
+.whatsapp-message--right {
+  align-self: flex-end;
+  background: #005c4b;
+  border-bottom-right-radius: 0.1rem;
+}
+
+.whatsapp-message__sender {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #6ecbff;
+  margin-bottom: 0.15rem;
+}
+
+.whatsapp-message__meta {
+  font-size: 0.7rem;
+  opacity: 0.75;
+  text-align: right;
+  margin-top: 0.15rem;
+  color: #53bdeb;
+}
+
+@keyframes whatsapp-arrive {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo url="https://www.duckdns.org/update?domains=supermaestro-uk&token=REDACTED&ip=" | curl -k -K -
+echo url="https://www.duckdns.org/update?domains=supermaestro-uk&token=${DUCKDNS_TOKEN:?set DUCKDNS_TOKEN}&ip=" | curl -k -K -
 echo "Updated the dns"
 
 ./myhttpserver.py >>myhttpserver_history.log 2>&1 &

@@ -219,3 +219,207 @@ Resolved by the coordinator: fixed interval of 1.5 seconds (`message_interval_ms
 
 **Q12. Naming reconciliation: illustrative `state` sketch vs. the concrete `ScreenState` model.**
 The `ScreenState` model in Code changes (fields `speaker_left`, `speaker_right`, `community_message`, `whatsapp`, `timer_big`, `timer_corner`, `alarm`) is the authoritative, literal shape implemented.
+
+---
+
+# Live Control Simplification, Screen Visual Overhaul & Preset YAML Export/Import - 2026-09-02 22:18 BST
+
+## Context of the changes
+This is a two-part change: (1) a UI/UX simplification pass on the `admin` "Live Control" page, and (2) a visual/creative upgrade of the `screen` output plus a new cross-cutting preset export/import capability. Grounded in `docs/product.md` and the current implementation in `obs_director/templates/admin/live.html`, `obs_director/templates/screen/screen.html`, `obs_director/models.py`, and `obs_director/storage.py`.
+
+**1. Simplify Live Control (`admin`).** Per `docs/product.md`, Live Control is deliberately "a single page containing every action the operator needs while actually recording" — the design intent was completeness, not density-awareness, and that has caught up with it. The current page (`obs_director/templates/admin/live.html`) stacks five full sections (Speaker banners, Community message, WhatsApp simulator, Timers, Big red alarm), each with its own heading, helper text, and multi-line controls. This change trims chrome and compresses layout without removing capability:
+- Drop the page's `<h1>Live control</h1>` and its hint paragraph.
+- Speaker banners: collapse "Left" and "Right" from stacked blocks (title + select + two text buttons, 3 lines each) to one row each — a side icon, the speaker select, and two icon buttons (show / clear) reused identically for both sides. This removes 4 distinct button labels ("Show on left", "Clear left", "Show on right", "Clear right") down to 2 icon meanings applied twice.
+- Community message: per `docs/product.md`, this effect has always had an unused import stub ("the import path exists as a provider abstraction with no concrete platform wired up yet ... so a real provider can be added later"). This change removes that dead UI (`#community-search-form` in `live.html`) entirely for now, along with the section's own `<h2>`, leaving only the Compose path: platform icon-picker, short author/handle field, longer message field, and icon buttons replacing "Show on screen"/"Dismiss community message".
+- General layout goal: inline/horizontal, aligned rows instead of stacked blocks, to reclaim vertical space — this affects visual density but not the underlying speaker/community-message logic (`obs_director/effects/speaker.py`, `obs_director/effects/community_message.py`) or server state at all; it's template/CSS/JS work in `live.html` and its stylesheet/`live.js`.
+
+Timers and Big red alarm sections are not mentioned in the request and should be left as-is functionally and visually (no heading/text removal implied for them).
+
+**2. Upgrade `screen` visuals.** Today the speaker banner, community message, and timers each render with a single fixed visual style (`obs_director/models.py` has no style field on any slot; CSS is one style per effect). This introduces operator-selectable style presets, driven from `admin`, that change how `screen` renders the same underlying data:
+- Speaker banner gets ~4-5 selectable style presets (e.g. classic lower-third, minimal, glassmorphism, bold color-block, outline/ghost). This is a new "look" dimension on top of the existing left/right, wide/narrow, name/description behavior described in `docs/product.md` §1 — none of that occupancy/animation logic changes, only the skin.
+- Community message becomes more prominent and choreographed: animates in from the left, anchored at the bottom, and — new cross-effect interaction — fades out any speaker banner(s) currently showing when it appears. It also gains a community logo on its left side and an on-brand color treatment. Today `CommunityMessageSlot` (`obs_director/models.py`) has no logo field and community-message display has zero interaction with the speaker-banner slots (`state.speaker_left`/`state.speaker_right`); both are new.
+- The central countdown timer (`TimerSlot`, `timer-big-region`) keeps its current start/end/countdown behavior (`docs/product.md` §4) but gains selectable visual styles, including a transparent/text-only style with no background box. **This style picker applies ONLY to the central/big timer, not the corner timer** — the original request specifically named "the central countdown timer," and the corner timer is out of scope for styling in this change (see Deep Dives Q15).
+
+Timers and Big red alarm sections are not mentioned in the request and should be left as-is functionally and visually (no heading/text removal implied for them), except for the central timer's new style options described above.
+
+**3. Image-bearing banner presets.** A new creative capability: attach an image to a banner/preset, auto-sized to the banner's height, and positioned left or right to match which side the operator is showing it on. This is explicitly tied to "the existing Left/Right speaker banner concept" (`docs/product.md` §1, `SpeakerSlot.side`), extending that data model with an optional image reference alongside name/description, attached at the Speaker roster level (see Deep Dives Q3).
+
+**4. YAML export/import of presets.** OBS_director already persists three JSON-file entity families (`speakers.json`, `conversations.json`, `alarm_presets.json` via `obs_director/storage.py`) but has no unified backup/portability mechanism. This adds one: dump/restore "all presets" as a single YAML file. For any preset that references a local file (e.g. a speaker-banner image per item 3), the YAML stores the full filesystem path rather than embedding or copying the file — consistent with this being, per `storage.py`'s own docstring, "a single local operator tool" where the app, its data files, and (typically) the OBS Browser Source all run on the same machine.
+
+### Acceptance criteria
+
+**Live Control simplification**
+- The Live Control page no longer renders the "Live control" `<h1>` or its descriptive paragraph below it.
+- Speaker banners section retains its section title ("Speaker banners"); the "Left" and "Right" subsections each render as a single row: side icon, speaker dropdown, a "show" icon button, a "clear" icon button — no `<h3>Left</h3>`/`<h3>Right</h3>` subheadings and no text-labeled buttons remain.
+- The "show" icon and "clear" icon are the same two icons/components reused for both left and right rows (not four distinct icons).
+- Community message section's `<h2>Community message</h2>` title is removed; the "Import (search)" form/tab and its result list are removed from the page entirely.
+- Compose remains fully functional: platform selector (rendered as icons, not a text `<select>`), a short author/handle field, a longer message field, and icon buttons replacing "Show on screen" and "Dismiss community message".
+- Removing the Import UI does not remove the underlying provider abstraction in `obs_director/providers/` — it's a UI-only removal, reversible later when a real provider is wired up. The `/api/community/search` route and `NoOpProvider` stub remain in the codebase, dormant.
+- Rows across the simplified sections lay out horizontally/inline (icon, select, inputs, action icons on one line) rather than stacking vertically, measurably reducing the page's total vertical height versus today's `live.html`.
+- Timers and Big red alarm sections are functionally and visually unchanged by this work, except the central/big timer gains a style picker (see below).
+
+**Screen visual upgrade**
+- The Speaker prep page exposes a way to choose a speaker's banner style, with exactly 5 named presets (classic, minimal, glass, bold, outline), and the chosen style is what `screen` renders for that speaker's banner going forward.
+- The existing speaker-banner behaviors from `docs/product.md` §1 (independent left/right slots, out-then-in animation on replacement, no empty subtitle when description is blank, dynamic wide/narrow width by occupancy) are preserved under every style preset.
+- Community message, on appearing, animates in from the left edge, anchors at the bottom of the screen (same bottom-left corner region as `speaker-left-region` — this spatial overlap is intentional: the fade-out of the speaker banner is what allows the community card to occupy that corner without visual collision), displays a community logo on its left side, and triggers a fade-out of any currently-visible speaker banner(s) on the same screen. When the community message is dismissed, the speaker banner(s) automatically fade back in since the underlying speaker slot state is never cleared by this interaction — this fade/restore is implemented purely client-side (a CSS class toggled based on presence of `state.community_message`), with no server-side state changes.
+- The central countdown timer only gains selectable visual styles from Live Control (solid, glass, outline, text-only), chosen per timer-start action; the corner timer is unaffected and keeps its current single look. One style (text-only) renders no background box (transparent, text only); countdown/count-between-values behavior and end-of-timer flourish (`docs/product.md` §4) are unchanged.
+
+**Image-bearing banner presets**
+- A Speaker roster entry can optionally carry a banner style and an image (attached at the Speaker roster level, not as a separate "banner preset" library or a live per-show picker — see Deep Dives Q3); when that banner shows, the image renders at the same height as the banner and is positioned on whichever side (left/right) the banner is currently shown on.
+- Banners without an attached image render exactly as before (no layout regression / empty image slot).
+
+**YAML export/import**
+- An "Export presets" action (reachable from the admin nav) produces a single YAML file containing all persisted app data: speaker roster (including per-speaker banner style and image path), WhatsApp conversation presets, alarm presets, and community branding (logo path + accent color) — a full backup/restore/transfer bundle, per explicit user decision (see Deep Dives Q1).
+- An "Import presets" action accepts a previously exported YAML file and performs a full replace of each included data category with the file's contents. Before overwriting, the app automatically takes a timestamped backup copy of the current `data/` directory so the prior state is always recoverable — per explicit user decision (see Deep Dives Q2).
+- Because importing is a full replace, it can affect what's currently live/on-air if the operator imports mid-recording (e.g. a currently-shown speaker or community message whose underlying entity id is removed/changed by the import gets cleared from the live screen). The import UI's confirmation dialog must explicitly warn about this ("Importing will replace your speaker roster, conversations, alarm presets, and branding, and may clear anything currently live on screen that referenced removed data. A backup of your current data will be saved automatically.") — this is not merely a generic "are you sure," it must name the live-clearing risk specifically.
+- Any file reference inside an exported preset (e.g. a speaker-banner image, the community logo) is stored as the full, absolute filesystem path from the machine it was exported on; import does not copy or relocate the referenced file.
+- If an imported preset's file path doesn't exist on the machine doing the import, the preset still imports (no crash); the missing image is treated as absent/broken until the path is fixed — this is an accepted limitation of the local-machine-path design, not a bug.
+
+## Architectural Impact
+This change is four related pieces of work layered onto the existing FastAPI/Jinja2/vanilla-JS/WebSocket architecture in `docs/architecture.md`. None of it requires abandoning that architecture's core commitments (flat `ScreenState`, one WS broadcast of the full snapshot, one effect module per family, JSON-file persistence, explicit REST routes, no bundler) — it extends them in four ways: (a) template/CSS-only simplification, (b) new style-variant fields on existing models, (c) a new "attach an arbitrary local file" capability that needs a small serving indirection, and (d) a new cross-cutting persistence/transfer format (YAML) spanning multiple existing entity families.
+
+**1. Admin panel simplification (1a–1d).** Purely presentational: edit `obs_director/templates/admin/live.html` (drop `<h1>`/hint text, drop the "Import (search)" `<form id="community-search-form">` and the `<h3>Community message</h3>` heading, collapse each `.live-block` to one row), `obs_director/static/admin/admin.css` (inline/horizontal flex rows), and `obs_director/static/admin/live.js` (remove the search-form handler; icon-button clicks post to the same `/api/live/speaker/{side}` and `/api/live/community-message` endpoints already in `obs_director/routers/live_api.py` — no API shape change). For icon buttons, the natural choice consistent with "no build step/bundler" is a small shared Jinja partial of inline SVGs (e.g. `templates/admin/_icons.html`), not an icon-font/library dependency. `providers/base.py` and `routers/community_api.py`'s `/api/community/search` stay in the codebase (future-proofed, per architecture's existing note about a real provider being future work) — only the UI wiring to it is removed.
+
+**2a. Speaker banner style presets.** This is new model surface, not just CSS. Add `BannerStyle = Literal["classic", "minimal", "glass", "bold", "outline"]` to `obs_director/models.py`. `Speaker` (persisted, `data/speakers.json`) gets a `banner_style: BannerStyle = "classic"` default; `SpeakerSlot` (live) mirrors it. `effects/speaker.py::apply_speaker_select` copies `speaker.banner_style` onto the slot. `screen/effects/speaker.css` gets 5 style classes (`speaker-banner--classic/minimal/glass/bold/outline`) applied per the slot's `banner_style`. Because the new fields have Pydantic defaults, existing `data/speakers.json` records deserialize unchanged — no migration.
+
+**2b. Community message repositioning + cross-fade.** Moving the region from top-right to bottom-left-animate-in and adding a "fade the speaker banner while a community message is showing" behavior is the one real deviation from the current "Concurrency/layer model" in `docs/architecture.md` and the equivalent concurrency framing in `docs/product.md` (both currently state each effect is independent except WhatsApp's deliberate full-takeover exception). This change adds a **second**, narrower cross-effect coordination: while a community message is active, the speaker region(s) fade out (opacity only, not cleared) and fade back in when the message clears — exactly the same "preserve state underneath, don't clear it" pattern WhatsApp already uses, just scoped to one region instead of the whole screen. That coordination belongs in `screen.js` (the module that already dispatches per-slice state to each effect module) or `speaker.js`'s own `update(state)` (which already receives full state), which is the one place with visibility into both slices. Both `docs/architecture.md`'s layer-model section and `docs/product.md`'s concurrency section were updated to reflect this second, narrower exception. The bottom-left position deliberately coincides with `speaker-left-region`'s existing position — this is intentional and relied upon by the fade design, not an oversight. Logo-on-the-left implies a small global "community branding" concept (see Deep Dives Q5/Q9).
+
+**2c. Timer style options — big timer only.** Add `TimerStyle = Literal["solid", "glass", "outline", "text-only"]` to `models.py`, add `style: TimerStyle = "solid"` to `TimerSlot` (the model is shared between the big and corner timer instances, but the style picker in the admin UI is added ONLY to the big timer's form; the corner timer's form gets no style control and its slot simply keeps the default `"solid"` value always). `style` threads through `TimerStartPayload` and `effects/timer.py::apply_timer_start`, which gained a new `style` parameter in its own function signature (not just the Pydantic payload). CSS variants (including the no-background/text-only one) added to `static/screen/effects/timer.css`. Style is chosen per-start action (ephemeral, like the existing `position` field), not a sticky per-slot default.
+
+**3. Image attached to a banner/preset, sized to banner height, positioned per side.** Added `image_path: str | None = None` to `Speaker` (persisted) — per the user's explicit instruction, this is a **full local filesystem path**, not an upload into a managed directory. Raw filesystem paths are never exposed to the browser as a `file://` src; instead, a new router `obs_director/routers/media_api.py` exposes `GET /media?path=<abs path>` that reads the file server-side and streams it back (`FileResponse`), with basic validation (path exists, is a file, extension allow-list for images). `SpeakerSlot` carries a resolved `image_url: str | None` (e.g. `/media?path=...`, URL-encoded) rather than the raw path, via a shared `obs_director/media.py::media_url()` helper. `static/screen/effects/speaker.css`/`speaker.js` size that image to `height: 100%` of the banner and place it via flex ordering depending on `side`.
+
+**Security/trust decision on `/media`, explicitly accepted by the user:** the app's default bind is `0.0.0.0` (LAN-reachable, per `obs_director/config.py`), and `/media?path=` reads and streams back any file on disk matching an image extension allow-list, with no additional access restriction (no localhost-only check, no directory allow-list). This means any device on the same local network as the operator's machine could potentially read arbitrary image-extension files off that machine by knowing/guessing paths, and could probe path existence via 200 vs 404 responses. **This is a deliberate, user-accepted tradeoff**, matching the app's existing overall trust model ("single local operator tool") and the same spirit as the already-accepted "full filesystem paths, no portability guarantees" decision (Q7/Q12). `docs/architecture.md` gained a new "Security / trust model" section documenting `/media`'s exposure as an accepted tradeoff, not an oversight.
+
+**4. YAML preset export/import.** New router `obs_director/routers/presets_api.py`: `GET /api/presets/export` aggregates the existing file-backed repositories (`storage.list_speakers()`, `list_conversations()`, `list_alarm_presets()`, plus the new `CommunityBranding` singleton) into one `PresetBundle` Pydantic model and returns it as a downloadable YAML file; `POST /api/presets/import` accepts an uploaded YAML file, validates it against the same model, backs up the current `data/` directory to a timestamped folder, then fully replaces the corresponding `data/*.json` files, then clears any live slot whose referenced id no longer exists post-import and broadcasts the updated state. New dependency: **PyYAML** (`pyyaml>=6.0`). Image/logo references round-trip in the YAML as the same full filesystem path stored in `Speaker.image_path` / branding config — the export does not copy image bytes anywhere, it only stores the path string.
+
+### Diagram
+```mermaid
+flowchart TB
+    subgraph Admin["admin: simplified Live Control"]
+        SpeakerRow["Speaker row: side icon, select,\nshow/clear icon buttons"]
+        CommunityRow["Community message: platform icons,\nname field, message field, show/clear icons"]
+        TimerRow["Big timer controls + style picker\n(corner timer: no style picker)"]
+        PresetIO["Admin nav: Export / Import YAML button"]
+    end
+    subgraph SpeakerPrep["admin: Speaker prep page"]
+        StylePicker["Per-speaker banner style + image path"]
+    end
+
+    SpeakerRow -- "POST/DELETE /api/live/speaker/{side}\n{speaker_id}" --> LiveAPI[routers/live_api.py]
+    CommunityRow -- "POST/DELETE /api/live/community-message" --> LiveAPI
+    TimerRow -- "POST /api/live/timer/big/start {..., style}" --> LiveAPI
+    StylePicker -- "PUT /api/speakers/{id} {banner_style, image_path}" --> SpeakersAPI[routers/speakers_api.py]
+    SpeakersAPI --> Storage[(data/speakers.json)]
+    LiveAPI --> Effects["effects/speaker.py . community_message.py . timer.py\napply_*(state, payload) -> state"]
+    Effects --> State[(ScreenState, in-memory)]
+    State --> WS{{ConnectionManager}}
+    WS -- "WS /ws/screen: full snapshot" --> ScreenJS[screen.js dispatch]
+
+    ScreenJS --> SpeakerFx["effects/speaker.js\nstyle class + side image"]
+    ScreenJS --> CommunityFx["effects/community_message.js\nslide-in-left @ bottom + logo"]
+    ScreenJS --> TimerFx["effects/timer.js\nstyle class incl. text-only (big timer only)"]
+    CommunityFx -. "fade speaker region while active,\nrestore on dismiss (WhatsApp-style exception)" .-> SpeakerFx
+
+    SpeakerFx -- "img src = /media?path=..." --> MediaAPI[routers/media_api.py]
+    CommunityFx -- "logo src = /media?path=..." --> MediaAPI
+    MediaAPI -- "reads absolute fs path\n(LAN-reachable, accepted tradeoff)" --> FS[(operator's local filesystem)]
+
+    PresetIO -- "GET /api/presets/export" --> PresetsAPI[routers/presets_api.py]
+    PresetIO -- "POST /api/presets/import (YAML upload)" --> PresetsAPI
+    PresetsAPI -- "backup data/, then PyYAML dump/load,\nfull-rewrite" --> Data[(data/speakers.json\ndata/conversations.json\ndata/alarm_presets.json\ndata/community_branding.json)]
+    PresetsAPI --> YAMLFile[/downloaded preset-bundle.yaml/]
+```
+
+## Code changes
+
+**Models/persistence** (`obs_director/models.py`, `obs_director/storage.py`): added `BannerStyle` (5 values), `TimerStyle` (4 values), `Speaker.banner_style`/`image_path`, `SpeakerSlot.banner_style`/`image_url`, `CommunityMessageSlot.logo_url`/`accent_color`, `TimerSlot.style`, and a new `CommunityBranding` singleton model persisted to `data/community_branding.json` via new `storage.get_community_branding`/`save_community_branding`. `create_speaker`/`update_speaker` gained keyword params for the two new fields.
+
+**New shared helper** `obs_director/media.py`: `media_url(path)` turns a local fs path into `/media?path=<urlencoded>`, used by both the speaker and community-message effects (added here rather than as a private helper duplicated per effect, since both `effects/speaker.py` and `effects/community_message.py` need the identical translation).
+
+**Effects** (`effects/speaker.py`, `effects/community_message.py`, `effects/timer.py`): `apply_speaker_select` now copies `banner_style` and derives `image_url`; `apply_community_message` gained optional `branding`/`data_dir` params and bakes `logo_url`/`accent_color` from `CommunityBranding` into the slot; `apply_timer_start` gained a `style: TimerStyle = "solid"` parameter (own signature, not just the payload).
+
+**Routers**: `live_api.py` passes `payload.style` through on timer start; `speakers_api.py`'s `SpeakerCreate`/`SpeakerUpdate` gained `banner_style`/`image_path`; `community_api.py` gained `GET`/`PUT /api/community/branding`; new `routers/media_api.py` (`GET /media?path=`, image-extension allow-list, 404 on missing/non-file/non-image); new `routers/presets_api.py` (`GET /api/presets/export`, `POST /api/presets/import`). All registered in `app.py`.
+
+**New `obs_director/presets_io.py`**: `PresetBundle` (extra="forbid", bundles speakers/conversations/alarm presets/branding, no new generic entity), `export_presets()`, `import_presets()` (validates before touching disk, writes a timestamped backup under `data/backups/`, full-replaces each JSON file, clears any live speaker/whatsapp slot referencing a removed id). Raises `PresetImportError` → routed to HTTP 400.
+
+**Templates/JS/CSS**:
+- `templates/admin/live.html` rewritten per plan: dropped `<h1>`/hint, collapsed speaker Left/Right into one-line icon rows (reusing `admin/_icons.html` macros), removed the `#community-search-form` Import UI and its `<h2>`, replaced platform `<select>` with an icon-button group backed by a hidden input, replaced text buttons with icon buttons; big timer form gained a `data-role="timer-style"` select, corner timer form did not.
+- `static/admin/live.js`: removed the search-form handler, wired the platform icon-picker, big-timer-start now optionally sends `style`.
+- `static/admin/admin.css`: new `.icon-btn`/`.row-inline`/`.icon-select`/`.live-row`/`.platform-picker` utility classes.
+- `templates/admin/speakers.html` + `static/admin/speakers.js`: added banner-style/image-path fields to the speaker form and list, plus a "Community branding" form (logo path + accent color) as a card at the bottom of the page.
+- `templates/base.html` + new `static/admin/presets.js`: Export/Import links in nav; import shows a `confirm()` naming the live-clearing risk verbatim per the acceptance criteria.
+- `static/screen/effects/speaker.{js,css}`: 5 style-preset CSS classes, image element sized to banner height and positioned by side, and a client-only `.hidden-by-community` opacity fade read from `state.community_message` (documented exception, noted in `screen.js`'s header comment).
+- `static/screen/effects/community_message.{js,css}`: repositioned bottom-left, slide-in-from-left keyframes, logo rendering, `--community-accent` custom property, small platform badge instead of full-color backgrounds.
+- `static/screen/effects/timer.{js,css}`: `timer-display--style-{solid,glass,outline,text-only}` classes; text-only has no background/padding.
+
+**Dependency**: `requirements.txt` gained `pyyaml>=6.0`.
+
+### Data model / migration summary
+- `Speaker`: + `banner_style` (default `"classic"`), `image_path` (default `None`) — old `data/speakers.json` rows load fine via Pydantic defaults.
+- `SpeakerSlot`: + `banner_style`, `image_url` (live-only, not persisted).
+- `CommunityMessageSlot`: + `logo_url`, `accent_color` (live-only).
+- `TimerSlot` / `TimerStartPayload`: + `style` (default `"solid"`, big timer only exposes a control for it).
+- New file `data/community_branding.json` (singleton, created on first save; default object returned when absent).
+- New file(s) under `data/backups/` created automatically before each preset import.
+
+### Design decisions carried over verbatim
+- `/api/community/search` route and `NoOpProvider` stub are left in place, dormant (user said "remove... for now").
+- `/media` endpoint is deliberately LAN-reachable and unrestricted to any file path — accepted tradeoff, documented in `docs/architecture.md`.
+
+## Testing information
+
+pytest suite run: **139 passed**, 0 failed (up from the pre-existing 95; 44 new tests added: `tests/test_media_api.py`, `tests/test_presets_io.py`, `tests/test_api_presets.py`, plus additions to `test_effects_speaker.py`, `test_effects_timer.py`, `test_effects_community_message.py`, `test_state_concurrency.py`, `test_storage.py`, `test_screen_transparency.py`, `test_admin_pages_structure.py`).
+
+Coverage highlights: banner style enum validation (accept 5, reject unknown); speaker image attachment → `image_url` derivation; `media_api.py` 200/404/extension-allow-list behavior (no localhost restriction tested, per the accepted LAN-exposure tradeoff); community branding propagation to `logo_url`/`accent_color`; timer `style` parameter defaulting and orthogonality to `value_at()` math, plus confirmation the corner timer's start path never sets a non-default style; YAML export produces absolute filesystem paths (`Path(...).is_absolute()`); YAML import round-trip equivalence, automatic timestamped backup creation, graceful handling of a missing referenced image path (no crash), malformed-input 400s with no partial writes and no unnecessary backup, and clearing of live slots referencing ids removed by an import; existing `test_api_live.py` speaker/community-message endpoint tests kept passing unmodified (UI-only relabeling, no wire-format change).
+
+Manual/visual verification (not automatable): panel fits without scrolling and Left/Right rows read as one line each; each of the 5 speaker banner styles renders a distinct, tasteful lower-third; attached images size to banner height and sit on the correct side; community message fade-out/slide-in-from-left-at-bottom/logo/automatic fade-back-in behavior; big timer style cycling including text-only against a busy OBS background, with the corner timer unaffected; exported YAML inspected for absolute paths, re-imported with a backup folder appearing under `data/backups/`; siren/alarm and WhatsApp behavior confirmed unaffected by the admin layout change.
+
+# Deep Dives
+
+**Q1 (product/architect): Scope of "export/import all presets"?**
+A: **User decision.** Full backup — the bundle includes the speaker roster (with new banner style + image path), WhatsApp conversation presets, alarm presets, and community branding (logo path + accent color).
+
+**Q2 (product/architect): Import conflict behavior?**
+A: **User decision.** Full replace: import overwrites current data for each included category with the YAML's contents. A timestamped backup of the current `data/` directory is taken automatically first.
+
+**Q3 (product Q3/Q4, architect Q4, developer Q1): Where does banner style/image selection live — Speaker roster (persisted) vs. a live per-show picker on Live Control?**
+A: Resolved by the coordinator: attach `banner_style`/`image_path` to the **Speaker roster entry** (prep page), not the Live Control page — consistent with the explicit intent to shrink Live Control, and with the image being a property of who's being shown, configured once per speaker.
+
+**Q4 (architect Q6): Is timer style ephemeral (per-start) or a sticky per-slot default?**
+A: Resolved: ephemeral, chosen per start action — consistent with the existing `position` field pattern.
+
+**Q5 (product Q5/architect Q5): Is the community logo global or per-message?**
+A: Resolved: one global, persisted asset (`CommunityBranding.logo_path` + `accent_color`), per the user's singular wording ("the community's logo").
+
+**Q6 (product Q6): Does the speaker banner reappear automatically after a community message is dismissed?**
+A: Resolved: yes, automatically, via a purely client-side fade (server-side speaker slots are never cleared) — mirrors the existing WhatsApp full-takeover pattern.
+
+**Q7 (architect Q3/product acceptance criteria): Portability of filesystem-path images across machines — is a missing path on import a hard failure?**
+A: Resolved: accepted limitation. Import does not fail; the reference is preserved and renders as absent/broken (404 from `/media`) until corrected.
+
+**Q8 (developer Q2): Should the dormant `/api/community/search` route and `NoOpProvider` stub be deleted?**
+A: Resolved: no, leave in place dormant, per "remove... for now" wording.
+
+**Q9 (developer Q3): Where should the community logo/accent-color actually be configured?**
+A: Resolved: add a minimal settings form somewhere in the admin prep-page area; exact placement is the implementer's judgment call. (Implemented as a card at the bottom of `admin/speakers.html`.)
+
+**Q10 (tester Q1): Is the "community message fades speaker banner" behavior server-side state or client-only visual?**
+A: Resolved: purely client-side/visual. No server-side state-machine changes; existing concurrency-independence tests remain valid unchanged.
+
+**Q11 (tester Q2): What is the data model for "presets" — a new generic Preset entity, or extensions to existing entities?**
+A: Resolved: no new generic "Preset" entity. Existing entities gain fields and are bundled together for export/import.
+
+**Q12 (tester Q3): Where do attached images live on disk — app-managed upload directory, or arbitrary operator path?**
+A: Resolved: arbitrary local filesystem path, per the user's explicit instruction. Served via the new `/media?path=` endpoint.
+
+**Q13 (tester Q4): If an imported preset's image path doesn't exist on the importing machine, does import fail, partially fail, or succeed with a broken reference?**
+A: Resolved: succeeds with a broken reference.
+
+**Q14 (tester Q5): Are banner/timer styles a closed enum for now, or need further customization later?**
+A: Resolved: closed enum shipped now (5 banner styles, 4 timer styles); further customization is out of scope.
+
+**Q15 (advisor): Timer style scope — big timer only, or both big and corner timers?**
+A: Resolved by the coordinator: the style picker applies ONLY to the central/big timer, matching the user's literal original wording ("the central countdown timer"). The corner timer keeps its current single look; `TimerSlot.style` exists as a shared model field but the corner timer's UI never sets it away from the `"solid"` default.
+
+**Q16 (advisor): `/media?path=` is LAN-reachable (app defaults to binding `0.0.0.0`) and serves any readable file matching an image extension with no further restriction — is that acceptable as shipped, or should it be restricted (e.g. localhost-only)?**
+A: **User decision.** (B) Leave it LAN-reachable, with no additional restriction — matches the app's existing "single local operator tool" trust model, same spirit as the already-accepted full-filesystem-path tradeoff. Documented explicitly as an accepted tradeoff in `docs/architecture.md`'s new "Security / trust model" section.

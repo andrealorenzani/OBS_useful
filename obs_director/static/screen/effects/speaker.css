@@ -1,14 +1,23 @@
 .region--speaker-left {
   left: 0;
   bottom: 6vh;
-  transition: width 0.4s ease;
+  transition: width 0.4s ease, opacity 0.3s ease;
 }
 
 .region--speaker-right {
   right: 0;
   bottom: 6vh;
   text-align: right;
-  transition: width 0.4s ease;
+  transition: width 0.4s ease, opacity 0.3s ease;
+}
+
+/* Cross-effect exception (Code changes §2b, mirrors the WhatsApp
+   preserve-but-cover pattern): while a community message is showing, both
+   speaker regions fade out (opacity only — server-side state is untouched)
+   and fade back in automatically once the message is dismissed. Purely
+   client-side/visual; toggled by speaker.js based on `!!state.community_message`. */
+.region--speaker.hidden-by-community {
+  opacity: 0;
 }
 
 /* Dynamic width (Deep Dive Q1): lone occupied side is wide/prominent,
@@ -24,7 +33,9 @@
 }
 
 .speaker-banner {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
   margin: 0 4vw;
   padding: 1.2rem 2rem;
   background: rgba(10, 10, 20, 0.72);
@@ -41,6 +52,11 @@
   border-right: 6px solid #ff6a3b;
 }
 
+.speaker-banner__text {
+  display: flex;
+  flex-direction: column;
+}
+
 .speaker-banner__name {
   font-size: 2.4rem;
   font-weight: 700;
@@ -51,6 +67,93 @@
   font-size: 1.2rem;
   opacity: 0.85;
   margin-top: 0.2rem;
+}
+
+/* Image attached to the banner (Code changes §3): sized to the banner's
+   height, positioned toward whichever side (left/right) the banner is
+   currently shown on — i.e. toward the screen's outer edge on that side. */
+.speaker-banner__image {
+  height: 100%;
+  max-height: 6rem;
+  width: auto;
+  object-fit: cover;
+  border-radius: 0.35rem;
+  flex: 0 0 auto;
+}
+
+.speaker-banner__image--left {
+  order: -1;
+}
+
+.speaker-banner__image--right {
+  order: 1;
+}
+
+/* --- Banner style presets (Code changes §2a): 5 selectable "skins" on top
+   of the same left/right/wide-narrow/name-description behaviour above. Each
+   only changes the banner's own look (background/border/padding), never the
+   `.region--*` layout rules, so the screen-transparency guard test (which
+   forbids opaque backgrounds only on bare `.region--*` selectors) is
+   unaffected. --------------------------------------------------------- */
+
+.speaker-banner--style-classic {
+  background: rgba(10, 10, 20, 0.72);
+  border-radius: 0.5rem;
+}
+
+.speaker-banner--style-minimal {
+  background: transparent;
+  border-radius: 0;
+  padding: 0.4rem 0;
+  box-shadow: none;
+}
+
+.speaker-banner--style-minimal.speaker-banner--left {
+  border-left: none;
+  border-bottom: 3px solid #3ba7ff;
+}
+
+.speaker-banner--style-minimal.speaker-banner--right {
+  border-right: none;
+  border-bottom: 3px solid #ff6a3b;
+}
+
+.speaker-banner--style-minimal .speaker-banner__name,
+.speaker-banner--style-minimal .speaker-banner__description {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+}
+
+.speaker-banner--style-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 0.9rem;
+}
+
+.speaker-banner--style-bold {
+  background: linear-gradient(90deg, #ff6a3b, #ff3b81);
+  border-radius: 0;
+  clip-path: polygon(0 0, 100% 0, 96% 100%, 0% 100%);
+  padding: 1.2rem 2.4rem;
+}
+
+.speaker-banner--style-bold.speaker-banner--left,
+.speaker-banner--style-bold.speaker-banner--right {
+  border: none;
+}
+
+.speaker-banner--style-outline {
+  background: rgba(10, 10, 20, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 0.6rem;
+  padding: 1.4rem 2.2rem;
+}
+
+.speaker-banner--style-outline.speaker-banner--left,
+.speaker-banner--style-outline.speaker-banner--right {
+  border-left: 2px solid rgba(255, 255, 255, 0.7);
+  border-right: 2px solid rgba(255, 255, 255, 0.7);
 }
 
 /* Entrance direction matches the side. */

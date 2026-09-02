@@ -17,11 +17,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .config import settings
-from .models import AlarmPreset, Speaker, WhatsAppConversation, WhatsAppMessage
+from .models import AlarmPreset, CommunityBranding, Speaker, WhatsAppConversation, WhatsAppMessage
 
 SPEAKERS_FILE = "speakers.json"
 CONVERSATIONS_FILE = "conversations.json"
 ALARM_PRESETS_FILE = "alarm_presets.json"
+COMMUNITY_BRANDING_FILE = "community_branding.json"
 
 
 def _now_iso() -> str:
@@ -72,8 +73,21 @@ def get_speaker(speaker_id: str, data_dir: Path | str | None = None) -> Speaker 
     return None
 
 
-def create_speaker(name: str, description: str | None = None, data_dir: Path | str | None = None) -> Speaker:
-    speaker = Speaker(id=_new_id(), name=name, description=description or None, created_at=_now_iso())
+def create_speaker(
+    name: str,
+    description: str | None = None,
+    data_dir: Path | str | None = None,
+    banner_style: str = "classic",
+    image_path: str | None = None,
+) -> Speaker:
+    speaker = Speaker(
+        id=_new_id(),
+        name=name,
+        description=description or None,
+        created_at=_now_iso(),
+        banner_style=banner_style,
+        image_path=image_path or None,
+    )
     items = _load_raw(data_dir, SPEAKERS_FILE)
     items.append(speaker.model_dump())
     _save_raw(data_dir, SPEAKERS_FILE, items)
@@ -85,6 +99,8 @@ def update_speaker(
     name: str,
     description: str | None = None,
     data_dir: Path | str | None = None,
+    banner_style: str = "classic",
+    image_path: str | None = None,
 ) -> Speaker | None:
     items = _load_raw(data_dir, SPEAKERS_FILE)
     updated: Speaker | None = None
@@ -92,6 +108,8 @@ def update_speaker(
         if raw["id"] == speaker_id:
             raw["name"] = name
             raw["description"] = description or None
+            raw["banner_style"] = banner_style
+            raw["image_path"] = image_path or None
             updated = Speaker(**raw)
             break
     if updated is None:
@@ -295,3 +313,37 @@ def delete_alarm_preset(preset_id: str, data_dir: Path | str | None = None) -> b
         return False
     _save_raw(data_dir, ALARM_PRESETS_FILE, remaining)
     return True
+
+
+# ---------------------------------------------------------------------------
+# Community branding (singleton)
+# ---------------------------------------------------------------------------
+
+
+def get_community_branding(data_dir: Path | str | None = None) -> CommunityBranding:
+    """Returns the persisted branding singleton, or defaults when absent
+    (Deep Dive Q5/Q9: one global logo + accent color, not per-message)."""
+
+    path = _resolve_dir(data_dir) / COMMUNITY_BRANDING_FILE
+    if not path.exists():
+        return CommunityBranding()
+    with path.open("r", encoding="utf-8") as f:
+        content = f.read().strip()
+    if not content:
+        return CommunityBranding()
+    return CommunityBranding(**json.loads(content))
+
+
+def save_community_branding(
+    logo_path: str | None,
+    accent_color: str,
+    data_dir: Path | str | None = None,
+) -> CommunityBranding:
+    branding = CommunityBranding(logo_path=logo_path or None, accent_color=accent_color)
+    directory = _resolve_dir(data_dir)
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / COMMUNITY_BRANDING_FILE
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(branding.model_dump(), f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    return branding

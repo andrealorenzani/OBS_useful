@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from .. import state as state_module
 from .. import storage
 from ..effects.speaker import apply_speaker_clear
-from ..models import Speaker
+from ..models import BannerStyle, Speaker
 
 router = APIRouter(prefix="/api/speakers", tags=["speakers"])
 
@@ -17,11 +17,15 @@ router = APIRouter(prefix="/api/speakers", tags=["speakers"])
 class SpeakerCreate(BaseModel):
     name: str
     description: str | None = None
+    banner_style: BannerStyle = "classic"
+    image_path: str | None = None
 
 
 class SpeakerUpdate(BaseModel):
     name: str
     description: str | None = None
+    banner_style: BannerStyle = "classic"
+    image_path: str | None = None
 
 
 @router.get("", response_model=list[Speaker])
@@ -34,7 +38,9 @@ async def create_speaker(payload: SpeakerCreate) -> Speaker:
     name = payload.name.strip()
     if not name:
         raise HTTPException(status_code=400, detail="name is required")
-    return storage.create_speaker(name, payload.description)
+    return storage.create_speaker(
+        name, payload.description, banner_style=payload.banner_style, image_path=payload.image_path
+    )
 
 
 @router.put("/{speaker_id}", response_model=Speaker)
@@ -42,7 +48,9 @@ async def update_speaker(speaker_id: str, payload: SpeakerUpdate) -> Speaker:
     name = payload.name.strip()
     if not name:
         raise HTTPException(status_code=400, detail="name is required")
-    speaker = storage.update_speaker(speaker_id, name, payload.description)
+    speaker = storage.update_speaker(
+        speaker_id, name, payload.description, banner_style=payload.banner_style, image_path=payload.image_path
+    )
     if speaker is None:
         raise HTTPException(status_code=404, detail="speaker not found")
     # Deep Dive Q6: editing does not live-update an already-showing banner.

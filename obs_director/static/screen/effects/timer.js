@@ -10,8 +10,8 @@
   };
 
   const runtime = {
-    big: { slot: null, completed: false, raf: null },
-    corner: { slot: null, completed: false, raf: null },
+    big: { slot: null, completed: false, raf: null, appliedStyle: null },
+    corner: { slot: null, completed: false, raf: null, appliedStyle: null },
   };
 
   function direction(slot) {
@@ -62,6 +62,19 @@
     const value = valueAt(Date.now(), slot);
     el.textContent = formatSeconds(value);
 
+    // Style picker only applies to the big timer (Deep Dive Q15); the corner
+    // timer's slot always defaults to "solid" so this is a no-op for it.
+    // Only touch classList when the style actually changed, to avoid
+    // needless per-frame DOM churn.
+    const style = slot.style || "solid";
+    if (rt.appliedStyle !== style) {
+      if (rt.appliedStyle) {
+        el.classList.remove(`timer-display--style-${rt.appliedStyle}`);
+      }
+      el.classList.add(`timer-display--style-${style}`);
+      rt.appliedStyle = style;
+    }
+
     const complete = Math.abs(value - slot.end_seconds) < 1e-9;
     if (complete && !rt.completed) {
       rt.completed = true;
@@ -89,6 +102,7 @@
       stopTicking(which);
       regionsByWhich[which].innerHTML = "";
       rt.completed = false;
+      rt.appliedStyle = null;
       return;
     }
     rt.completed = false;

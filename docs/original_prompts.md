@@ -93,3 +93,34 @@ Append-only log of the user's original prompts, verbatim, most recent last. Appe
 > 2. Community message import: Option C — skip real import for v1. Build the provider interface/abstraction so a real platform can be plugged in later, but ship with no concrete provider wired up (search returns no results for now). The free-text-plus-platform-style path must be fully functional.
 >
 > 3. Big red alarm: Option B — include real siren audio via Web Audio, played through the browser tab. Handle browser autoplay restrictions sensibly (e.g. trigger only on an explicit admin action, which counts as a user-gesture-adjacent trigger from the operator's perspective — document that OBS needs to be configured to capture that Browser Source's audio track for the siren to be heard in the stream/recording).
+
+## 2026-09-02 — Live Control simplification, screen visual overhaul, preset YAML export/import
+
+### Original request (start of task)
+
+> The user wants a substantial UI/UX overhaul of OBS_director's admin ("Live Control") panel and the OBS "screen" display page, plus new preset import/export capability. Full requirements from the user, verbatim intent preserved:
+>
+> 1. Simplify the admin panel (currently called "Live Control") — it's too big with too many elements:
+>    a. Remove the top "Live Control" heading and the descriptive text below it.
+>    b. "Speaker banners" section: keep the title, but collapse each subgroup ("Left" and "Right") to one line each. Put an icon representing Left/Right to the left of the selection box. Replace the "Show on left"/"Clear left" (and right equivalents) buttons with standardized icon buttons: one "show" icon and one "clear" icon (reused for both left and right, i.e. just two icon meanings total, applied per row).
+>    c. "Community message" section: remove the "Import" tab/feature for now — only keep "Compose". Remove the section title. Keep: icons for selecting which social platform, two text fields (one short for name/handle, one longer for the message), and replace "Show"/"Dismiss" text buttons with icon buttons.
+>    d. Overall goal: simplify visually using icons, and lay elements out inline/horizontally and aligned wherever possible to save vertical space.
+>
+> 2. Improve the "screen" (OBS browser source output) page's visuals:
+>    a. Speaker banner should look more like a modern, elegant news-broadcast lower-third/banner. Add the ability in the admin page to choose between banner styles — design ~4-5 distinct style presets that make sense for this use case (e.g. classic lower-third, minimal, glassmorphism, bold color-block, outline/ghost style — use your judgment on what's tasteful).
+>    b. The community message banner should animate in from the left, positioned at the bottom, and should fade out any currently-showing speaker banner when it appears. The community message banner should include the community's logo on its left side. Colors should be visually appealing/on-brand.
+>    c. The central countdown timer is good as-is functionally, but needs a few visual style options too — including one style with no background (transparent/text-only).
+>
+> 3. Be creative with presets: add the ability to attach an image to a banner/preset and have it sized to the same height as the banner, positioned on the left or right side depending on which side the controller is showing it on (i.e. ties into the existing Left/Right speaker banner concept).
+>
+> 4. Add the ability to export and import all presets as a YAML file. For any custom file reference within a preset (e.g. custom images), store/use the full machine filesystem path.
+>
+> Please gather input from your usual sub-agents (product-owner, architect, developer, tester), compose one coherent change plan, get it sanity-checked by the advisor, resolve any open questions yourself where reasonable (ask the user only if something is truly ambiguous or high-stakes, e.g. destructive/breaking changes to existing presets/config format), then run the implementer and documenter in sequence. This is a real implementation task — please write the actual code changes, not just a plan.
+
+### Clarifying answers given by the user during plan resolution
+
+> Export/import scope: (A) Everything — full backup. Bundle includes speaker roster (with new per-speaker banner style + image path), WhatsApp conversation presets, alarm presets, and the new community branding config (logo path + accent color).
+>
+> Import behavior: (A) Full replace + auto-backup. Importing overwrites current data for each included category with the YAML contents, but first auto-saves a timestamped backup of the current data/ directory so the prior state is always recoverable.
+
+> Decision: (B) Leave /media LAN-reachable, no additional restriction — matches the app's existing "single local operator tool" trust model, same spirit as the already-accepted full-filesystem-path tradeoff. Please document this as an explicit accepted tradeoff (in docs/architecture.md's security/trust section) and proceed with finalizing the plan and running the implementer and documenter.

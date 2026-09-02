@@ -69,6 +69,19 @@ def test_whatsapp_takeover_preserves_other_effects_underneath():
     assert state.alarm is not None
 
 
+def test_new_style_fields_default_sensibly_across_all_families():
+    # Guard against a future edit accidentally requiring these new fields to
+    # be explicitly set — every one of them must have a safe default so
+    # existing callers (and old data) keep working unchanged.
+    state = _fully_loaded_state()
+    assert state.speaker_left.banner_style == "classic"
+    assert state.speaker_left.image_url is None
+    assert state.community_message.accent_color == "#5b8def"
+    assert state.community_message.logo_url is None
+    assert state.timer_big.style == "solid"
+    assert state.timer_corner.style == "solid"
+
+
 def test_stopping_whatsapp_reveals_everything_still_active_underneath():
     state = _fully_loaded_state()
     convo = WhatsAppConversation(id="c1", name="Chat", created_at="now", messages=[])

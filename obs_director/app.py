@@ -11,7 +11,9 @@ from .routers import (
     alarm_presets_api,
     community_api,
     live_api,
+    media_api,
     pages,
+    presets_api,
     screen_ws,
     speakers_api,
     whatsapp_api,
@@ -31,6 +33,8 @@ def create_app() -> FastAPI:
     app.include_router(alarm_presets_api.router)
     app.include_router(community_api.router)
     app.include_router(live_api.router)
+    app.include_router(media_api.router)
+    app.include_router(presets_api.router)
     app.include_router(screen_ws.router)
 
     return app

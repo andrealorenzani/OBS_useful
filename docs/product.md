@@ -27,7 +27,14 @@ truth for what's currently showing.
 
 ## Status
 The first real feature release has shipped: five overlay effects, all wired through the
-`screen`/`admin` split described above.
+`screen`/`admin` split described above. A follow-up release simplified the live-control page's
+chrome, added the visual style/branding options described per-effect below, and added an
+"export/import all presets as one YAML file" backup/transfer tool (reachable from the admin nav):
+export bundles the speaker roster, WhatsApp conversation presets, alarm presets, and community
+branding into a single downloadable file; import fully replaces those categories from an
+uploaded file, after automatically backing up the current data first. Any file reference inside
+an exported preset (a speaker's banner image, the community logo) is stored as the full local
+filesystem path from the machine it was exported on — importing does not copy the file itself.
 
 ### Effects
 
@@ -44,7 +51,10 @@ The first real feature release has shipped: five overlay effects, all wired thro
    wide/prominent banner, and when both sides are occupied at once each narrows to share the
    screen, animating smoothly as occupancy changes. Editing the roster only affects future
    selections, not a banner already live; deleting a speaker that's currently live clears that
-   side.
+   side. Each roster entry can also carry a banner style (one of five presets: classic, minimal,
+   glass, bold, outline) and an optional banner image, sized to the banner's height and shown on
+   whichever side the banner is currently on — both configured once per speaker on the roster
+   prep page, not re-picked live.
 
 2. **Community message** — a social-media-styled callout with two authoring paths that converge
    on the same on-screen presentation: importing a message from a connected social account, or
@@ -54,7 +64,10 @@ The first real feature release has shipped: five overlay effects, all wired thro
    returns no results) so a real provider can be added later without reworking the display.
    Only one community message is shown at a time; showing a new one replaces the previous one
    with the same animate-out-then-in sequencing used by the speaker banner, and the operator can
-   dismiss it entirely.
+   dismiss it entirely. It animates in from the left edge, anchors bottom-left, and displays one
+   shared community logo alongside an on-brand accent color (both configured once, globally, in a
+   small branding section on a prep page) — see Concurrency below for its interaction with the
+   speaker banner.
 
 3. **WhatsApp discussion simulator** — pre-authored, named, fake chat scripts (ordered
    messages, each tagged incoming/left-with-sender-name or outgoing/right-with-timestamp-and-
@@ -70,7 +83,10 @@ The first real feature release has shipped: five overlay effects, all wired thro
    arbitrary configured start and end value. Both placements can run simultaneously with
    different modes/values. Reaching the end value is visually distinct (a flourish) rather than
    silently continuing or vanishing. Timers are configured ad hoc on the live-control page; no
-   timer-preset persistence exists in this release.
+   timer-preset persistence exists in this release. The central/big timer also offers a choice of
+   visual style per start (solid, glass, outline, or a transparent text-only look with no
+   background box); this style picker is specific to the central timer — the corner timer keeps
+   its single existing look.
 
 5. **Big red alarm** — a bold, high-contrast red banner (top or bottom, centered) for a "pay
    attention" moment, with a pulsing/looping entrance animation and real siren audio played
@@ -85,6 +101,12 @@ Speaker banner(s), community message, timer(s), and alarm are independent visual
 effect's animation or state interfering with another's. The WhatsApp simulator is the
 deliberate exception: it takes over the full frame while active, covering (but not clearing)
 whatever else is showing.
+
+A second, narrower exception: when a community message appears, it anchors bottom-left (the same
+corner as the left speaker banner) and any currently-showing speaker banner(s) fade out to make
+room for it, then fade back in automatically once the community message is dismissed — the
+underlying speaker selection is never cleared, only visually covered, exactly like the WhatsApp
+takeover above but scoped to the speaker region instead of the whole screen.
 
 ## Open product questions
 None outstanding for this release. Future extensions to watch for: wiring a real community-

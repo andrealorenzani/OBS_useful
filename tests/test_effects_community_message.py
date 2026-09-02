@@ -14,6 +14,7 @@ from obs_director.effects.community_message import (
     apply_community_message,
     apply_community_message_clear,
 )
+from obs_director.models import CommunityBranding
 from obs_director.state import ScreenState
 
 
@@ -69,3 +70,31 @@ def test_dismiss_clears_slot():
     apply_community_message(state, "x", "msg", author="A")
     apply_community_message_clear(state)
     assert state.community_message is None
+
+
+# --- Branding (Code changes §2b) --------------------------------------------
+
+
+def test_branding_logo_and_accent_propagate_onto_the_slot():
+    state = ScreenState()
+    branding = CommunityBranding(logo_path="/home/op/logo.png", accent_color="#ff00ff")
+    apply_community_message(state, "x", "hello", author="A", branding=branding)
+    assert state.community_message.logo_url == "/media?path=%2Fhome%2Fop%2Flogo.png"
+    assert state.community_message.accent_color == "#ff00ff"
+
+
+def test_default_branding_has_no_logo_and_does_not_break_the_slot():
+    state = ScreenState()
+    branding = CommunityBranding()
+    apply_community_message(state, "x", "hello", author="A", branding=branding)
+    assert state.community_message.logo_url is None
+    assert state.community_message.accent_color == "#5b8def"
+
+
+def test_branding_defaults_from_storage_when_not_passed_explicitly(tmp_path):
+    # No branding file exists yet at this data_dir: falls back to defaults
+    # rather than erroring.
+    state = ScreenState()
+    apply_community_message(state, "x", "hello", author="A", data_dir=tmp_path)
+    assert state.community_message.logo_url is None
+    assert state.community_message.accent_color == "#5b8def"

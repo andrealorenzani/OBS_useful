@@ -9,6 +9,18 @@
     <h2>Add speaker</h2>
     <label>Name <input type="text" name="name" required></label>
     <label>Description (optional) <input type="text" name="description"></label>
+    <label>Banner style
+      <select name="banner_style">
+        <option value="classic">Classic</option>
+        <option value="minimal">Minimal</option>
+        <option value="glass">Glass</option>
+        <option value="bold">Bold</option>
+        <option value="outline">Outline</option>
+      </select>
+    </label>
+    <label>Banner image path (optional, full local file path)
+      <input type="text" name="image_path" placeholder="/home/you/pictures/speaker.png">
+    </label>
     <button type="submit">Add speaker</button>
   </form>
 
@@ -17,12 +29,26 @@
       <li data-id="{{ speaker.id }}">
         <strong>{{ speaker.name }}</strong>
         {% if speaker.description %}<span class="muted"> — {{ speaker.description }}</span>{% endif %}
+        <span class="muted"> — style: {{ speaker.banner_style }}</span>
+        {% if speaker.image_path %}<span class="muted"> — image: {{ speaker.image_path }}</span>{% endif %}
         <button class="danger" data-action="delete">Delete</button>
       </li>
     {% else %}
       <li class="empty">No speakers yet.</li>
     {% endfor %}
   </ul>
+
+  <form id="community-branding-form" class="card">
+    <h2>Community branding</h2>
+    <p class="hint">One shared logo + accent color used by every community message.</p>
+    <label>Logo path (optional, full local file path)
+      <input type="text" name="logo_path" value="{{ community_branding.logo_path or '' }}" placeholder="/home/you/pictures/logo.png">
+    </label>
+    <label>Accent color
+      <input type="text" name="accent_color" value="{{ community_branding.accent_color }}">
+    </label>
+    <button type="submit">Save branding</button>
+  </form>
 {% endblock %}
 {% block scripts %}
   <script src="/static/admin/speakers.js"></script>

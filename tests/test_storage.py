@@ -57,6 +57,38 @@ def test_delete_speaker(tmp_path):
     assert storage.delete_speaker(speaker.id, data_dir=tmp_path) is False
 
 
+def test_speaker_banner_style_and_image_path_default_safely(tmp_path):
+    speaker = storage.create_speaker("Ada Lovelace", "Mathematician", data_dir=tmp_path)
+    assert speaker.banner_style == "classic"
+    assert speaker.image_path is None
+
+    reloaded = storage.get_speaker(speaker.id, data_dir=tmp_path)
+    assert reloaded.banner_style == "classic"
+    assert reloaded.image_path is None
+
+
+def test_speaker_banner_style_and_image_path_persist(tmp_path):
+    speaker = storage.create_speaker(
+        "Ada Lovelace",
+        "Mathematician",
+        data_dir=tmp_path,
+        banner_style="glass",
+        image_path="/home/op/ada.png",
+    )
+    assert speaker.banner_style == "glass"
+    assert speaker.image_path == "/home/op/ada.png"
+
+    updated = storage.update_speaker(
+        speaker.id, "Ada L.", None, data_dir=tmp_path, banner_style="bold", image_path="/home/op/ada2.png"
+    )
+    assert updated.banner_style == "bold"
+    assert updated.image_path == "/home/op/ada2.png"
+
+    reloaded = storage.get_speaker(speaker.id, data_dir=tmp_path)
+    assert reloaded.banner_style == "bold"
+    assert reloaded.image_path == "/home/op/ada2.png"
+
+
 def test_speaker_isolated_between_data_dirs(tmp_path):
     dir_a = tmp_path / "a"
     dir_b = tmp_path / "b"
@@ -144,3 +176,20 @@ def test_alarm_preset_crud(tmp_path):
 
     assert storage.delete_alarm_preset(preset.id, data_dir=tmp_path) is True
     assert storage.list_alarm_presets(data_dir=tmp_path) == []
+
+
+# --- Community branding -----------------------------------------------------
+
+
+def test_community_branding_defaults_when_no_file_exists(tmp_path):
+    branding = storage.get_community_branding(data_dir=tmp_path)
+    assert branding.logo_path is None
+    assert branding.accent_color == "#5b8def"
+
+
+def test_community_branding_save_and_reload_round_trip(tmp_path):
+    storage.save_community_branding("/home/op/logo.png", "#ff8800", data_dir=tmp_path)
+
+    reloaded = storage.get_community_branding(data_dir=tmp_path)
+    assert reloaded.logo_path == "/home/op/logo.png"
+    assert reloaded.accent_color == "#ff8800"

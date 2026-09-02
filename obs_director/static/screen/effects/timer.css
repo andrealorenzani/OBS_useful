@@ -32,6 +32,39 @@
   border-radius: 0.4em;
 }
 
+/* Style presets (Code changes §2c) — the admin style picker only exists on
+   the big timer's form, so in practice only `.region--timer-big` ever
+   receives a non-default class; the corner timer's slot always stays
+   "solid" (its markup never gets these classes applied away from default). */
+.timer-display--style-solid {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.3em 0.6em;
+  border-radius: 0.4em;
+}
+
+.timer-display--style-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.3em 0.7em;
+  border-radius: 0.6em;
+}
+
+.timer-display--style-outline {
+  background: transparent;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  padding: 0.25em 0.6em;
+  border-radius: 0.4em;
+}
+
+.timer-display--style-text-only {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.6);
+}
+
 .timer-display--complete {
   animation: timer-complete-flash 0.6s ease-in-out 2;
   color: #ffd23b;

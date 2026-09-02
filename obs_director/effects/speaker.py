@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
+from ..media import media_url
 from ..models import Side, Speaker, SpeakerSlot
 from ..state import ScreenState
 
@@ -35,6 +36,8 @@ def apply_speaker_select(state: ScreenState, side: Side, speaker: Speaker) -> Sc
         name=speaker.name,
         description=speaker.description,
         side=side,
+        banner_style=speaker.banner_style,
+        image_url=media_url(speaker.image_path),
     )
     if side == "left":
         state.speaker_left = slot

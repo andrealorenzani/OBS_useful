@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from ..models import TimerPosition, TimerSlot, TimerSlotName
+from ..models import TimerPosition, TimerSlot, TimerSlotName, TimerStyle
 from ..state import ScreenState
 
 _EPSILON = 1e-9
@@ -22,6 +22,7 @@ class TimerStartPayload(BaseModel):
     start_seconds: float
     end_seconds: float
     position: TimerPosition = "center"
+    style: TimerStyle = "solid"
 
 
 def _direction(slot: TimerSlot) -> int:
@@ -66,6 +67,7 @@ def apply_timer_start(
     end_seconds: float,
     position: str,
     now_ms: int,
+    style: str = "solid",
 ) -> ScreenState:
     slot = TimerSlot(
         start_seconds=start_seconds,
@@ -74,6 +76,7 @@ def apply_timer_start(
         paused_offset_seconds=0,
         running=True,
         position=position,
+        style=style,
     )
     setattr(state, _slot_attr(which), slot)
     return state

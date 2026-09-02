@@ -21,6 +21,8 @@ TimerPosition = Literal["center", "top-right", "bottom-right"]
 AlarmPosition = Literal["top", "bottom"]
 Platform = Literal["x", "discord", "facebook", "whatsapp"]
 MessageDirection = Literal["left", "right"]
+BannerStyle = Literal["classic", "minimal", "glass", "bold", "outline"]
+TimerStyle = Literal["solid", "glass", "outline", "text-only"]
 
 
 # ---------------------------------------------------------------------------
@@ -33,6 +35,8 @@ class Speaker(BaseModel):
     name: str
     description: str | None = None
     created_at: str
+    banner_style: BannerStyle = "classic"
+    image_path: str | None = None
 
 
 class WhatsAppMessage(BaseModel):
@@ -57,6 +61,14 @@ class AlarmPreset(BaseModel):
     created_at: str
 
 
+class CommunityBranding(BaseModel):
+    """Global, persisted community-message branding (Deep Dive Q5/Q9): one
+    logo + accent color shared by every community message, not per-message."""
+
+    logo_path: str | None = None
+    accent_color: str = "#5b8def"
+
+
 # ---------------------------------------------------------------------------
 # Live slot payloads (ScreenState)
 # ---------------------------------------------------------------------------
@@ -67,6 +79,8 @@ class SpeakerSlot(BaseModel):
     name: str
     description: str | None = None
     side: Side
+    banner_style: BannerStyle = "classic"
+    image_url: str | None = None
 
 
 class CommunityMessageSlot(BaseModel):
@@ -75,6 +89,8 @@ class CommunityMessageSlot(BaseModel):
     avatar_url: str | None = None
     text: str
     timestamp_label: str | None = None
+    logo_url: str | None = None
+    accent_color: str = "#5b8def"
 
 
 class WhatsAppMessageView(BaseModel):
@@ -98,6 +114,7 @@ class TimerSlot(BaseModel):
     paused_offset_seconds: float = 0
     running: bool = False
     position: TimerPosition = "center"
+    style: TimerStyle = "solid"
 
 
 class AlarmSlot(BaseModel):

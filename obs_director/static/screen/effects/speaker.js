@@ -23,21 +23,34 @@
     region.innerHTML = "";
     if (!slot) return;
 
+    const style = slot.banner_style || "classic";
     const banner = document.createElement("div");
-    banner.className = `speaker-banner speaker-banner--${side} speaker-banner--enter`;
+    banner.className = `speaker-banner speaker-banner--${side} speaker-banner--style-${style} speaker-banner--enter`;
+
+    if (slot.image_url) {
+      const img = document.createElement("img");
+      img.className = `speaker-banner__image speaker-banner__image--${side}`;
+      img.src = slot.image_url;
+      img.alt = "";
+      banner.appendChild(img);
+    }
+
+    const text = document.createElement("div");
+    text.className = "speaker-banner__text";
 
     const name = document.createElement("div");
     name.className = "speaker-banner__name speaker-banner__name--materialize";
     name.textContent = slot.name;
-    banner.appendChild(name);
+    text.appendChild(name);
 
     if (slot.description) {
       const desc = document.createElement("div");
       desc.className = "speaker-banner__description";
       desc.textContent = slot.description;
-      banner.appendChild(desc);
+      text.appendChild(desc);
     }
 
+    banner.appendChild(text);
     region.appendChild(banner);
   }
 
@@ -91,9 +104,21 @@
     }
   }
 
+  function updateCommunityFade(state) {
+    // Code changes §2b: a small, documented exception to "each module only
+    // touches its own slice of state" (also called out in screen.js's header
+    // comment) — while a community message is active, both speaker regions
+    // fade out (opacity only, server-side speaker slots are never cleared)
+    // and fade back in automatically once it's dismissed.
+    const hide = !!state.community_message;
+    regions.left.classList.toggle("hidden-by-community", hide);
+    regions.right.classList.toggle("hidden-by-community", hide);
+  }
+
   function update(state) {
     applySide("left", state.speaker_left);
     applySide("right", state.speaker_right);
+    updateCommunityFade(state);
   }
 
   window.OBSDirector = window.OBSDirector || {};

@@ -35,7 +35,10 @@ async def admin_speakers(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request,
         "admin/speakers.html",
-        {"speakers": storage.list_speakers()},
+        {
+            "speakers": storage.list_speakers(),
+            "community_branding": storage.get_community_branding(),
+        },
     )
 
 

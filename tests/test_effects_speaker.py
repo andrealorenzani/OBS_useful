@@ -13,18 +13,28 @@ for manual verification.
 
 from __future__ import annotations
 
+import pytest
+from pydantic import ValidationError
+
 from obs_director.effects.speaker import (
     apply_speaker_clear,
     apply_speaker_select,
     banner_width,
     default_description,
 )
-from obs_director.models import Speaker
+from obs_director.models import Speaker, SpeakerSlot
 from obs_director.state import ScreenState
 
 
-def _speaker(name="Ada", description=None):
-    return Speaker(id=name.lower(), name=name, description=description, created_at="now")
+def _speaker(name="Ada", description=None, banner_style="classic", image_path=None):
+    return Speaker(
+        id=name.lower(),
+        name=name,
+        description=description,
+        created_at="now",
+        banner_style=banner_style,
+        image_path=image_path,
+    )
 
 
 def test_default_description_is_none_not_fabricated():
@@ -105,3 +115,42 @@ def test_width_widens_again_after_clearing_one_side():
 
     apply_speaker_clear(state, "right")
     assert banner_width(state) == {"left": "wide", "right": None}
+
+
+# --- Banner style presets (Code changes §2a) --------------------------------
+
+
+@pytest.mark.parametrize("style", ["classic", "minimal", "glass", "bold", "outline"])
+def test_speaker_and_speaker_slot_accept_every_supported_banner_style(style):
+    speaker = _speaker("Ada", banner_style=style)
+    assert speaker.banner_style == style
+    slot = SpeakerSlot(speaker_id="a", name="Ada", side="left", banner_style=style)
+    assert slot.banner_style == style
+
+
+def test_unknown_banner_style_is_rejected():
+    with pytest.raises(ValidationError):
+        Speaker(id="a", name="Ada", created_at="now", banner_style="neon")
+    with pytest.raises(ValidationError):
+        SpeakerSlot(speaker_id="a", name="Ada", side="left", banner_style="neon")
+
+
+def test_apply_speaker_select_copies_banner_style_onto_the_slot():
+    state = ScreenState()
+    apply_speaker_select(state, "left", _speaker("Ada", banner_style="bold"))
+    assert state.speaker_left.banner_style == "bold"
+
+
+# --- Image attachment (Code changes §3) -------------------------------------
+
+
+def test_apply_speaker_select_derives_media_url_from_image_path():
+    state = ScreenState()
+    apply_speaker_select(state, "left", _speaker("Ada", image_path="/home/op/ada.png"))
+    assert state.speaker_left.image_url == "/media?path=%2Fhome%2Fop%2Fada.png"
+
+
+def test_apply_speaker_select_leaves_image_url_none_when_no_image_path():
+    state = ScreenState()
+    apply_speaker_select(state, "left", _speaker("Ada"))
+    assert state.speaker_left.image_url is None

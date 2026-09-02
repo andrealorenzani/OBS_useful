@@ -105,6 +105,34 @@ def test_apply_timer_clear_removes_slot():
     assert state.timer_big is None
 
 
+def test_apply_timer_start_defaults_style_to_solid():
+    state = ScreenState()
+    apply_timer_start(state, "big", 60, 0, "center", now_ms=0)
+    assert state.timer_big.style == "solid"
+
+
+def test_apply_timer_start_accepts_explicit_style():
+    state = ScreenState()
+    apply_timer_start(state, "big", 60, 0, "center", now_ms=0, style="text-only")
+    assert state.timer_big.style == "text-only"
+
+
+def test_timer_style_does_not_affect_value_at_math():
+    solid = _slot(start=60, end=0, anchor_ms=0)
+    glass = _slot(start=60, end=0, anchor_ms=0)
+    glass.style = "glass"
+    assert value_at(15_000, solid) == value_at(15_000, glass) == 45
+
+
+def test_corner_timer_start_path_never_sets_a_non_default_style():
+    # Deep Dive Q15: the style picker only exists on the big timer's admin
+    # form; the corner timer's start action never sends a style, so it
+    # always stays on the server default.
+    state = ScreenState()
+    apply_timer_start(state, "corner", 0, 300, "top-right", now_ms=0)
+    assert state.timer_corner.style == "solid"
+
+
 def test_reload_mid_countdown_resumes_at_correct_value_not_reset():
     # Simulates a screen reload: a fresh evaluation of value_at() using only
     # anchor_epoch_ms/paused_offset_seconds (never a client-accumulated

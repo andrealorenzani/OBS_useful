@@ -99,7 +99,13 @@ async def stop_whatsapp() -> None:
 @router.post("/timer/{which}/start", status_code=204)
 async def start_timer(which: TimerSlotName, payload: TimerStartPayload) -> None:
     apply_timer_start(
-        state_module.state, which, payload.start_seconds, payload.end_seconds, payload.position, _now_ms()
+        state_module.state,
+        which,
+        payload.start_seconds,
+        payload.end_seconds,
+        payload.position,
+        _now_ms(),
+        style=payload.style,
     )
     await state_module.broadcast_state()
 

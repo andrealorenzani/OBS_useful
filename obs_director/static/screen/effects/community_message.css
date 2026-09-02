@@ -1,31 +1,59 @@
+/* Code changes §2b: anchored bottom-left (intentionally the same corner as
+   .region--speaker-left — the speaker-fade cross-effect is what allows this
+   overlap without visual collision), animates in from the left edge. */
 .region--community-message {
-  top: 6vh;
-  right: 3vw;
+  left: 0;
+  bottom: 6vh;
   max-width: 32vw;
 }
 
 .community-card {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
   padding: 1rem 1.2rem;
   border-radius: 0.9rem;
   background: rgba(20, 20, 20, 0.85);
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  border-left: 5px solid var(--community-accent, #5b8def);
+}
+
+.community-card__logo {
+  height: 3rem;
+  width: 3rem;
+  max-height: 3rem;
+  object-fit: cover;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.community-card__content {
+  min-width: 0;
 }
 
 .community-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-weight: 700;
   margin-bottom: 0.3rem;
+}
+
+.community-card__platform-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: var(--community-accent, #5b8def);
+  font-size: 0.7rem;
 }
 
 .community-card__body {
   font-size: 1.05rem;
   overflow-wrap: break-word;
 }
-
-/* Lightweight "in the spirit of" platform theming. */
-.platform-x { border-left: 5px solid #ffffff; }
-.platform-discord { border-left: 5px solid #5865f2; background: rgba(88, 101, 242, 0.25); }
-.platform-facebook { border-left: 5px solid #1877f2; background: rgba(24, 119, 242, 0.22); }
-.platform-whatsapp { border-left: 5px solid #25d366; background: rgba(37, 211, 102, 0.2); border-radius: 1.1rem; }
 
 .community-card--enter {
   animation: community-slide-in 0.4s ease-out;
@@ -36,11 +64,11 @@
 }
 
 @keyframes community-slide-in {
-  from { transform: translateY(-30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 @keyframes community-slide-out {
-  from { transform: translateY(0); opacity: 1; }
-  to { transform: translateY(-30px); opacity: 0; }
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-100%); opacity: 0; }
 }

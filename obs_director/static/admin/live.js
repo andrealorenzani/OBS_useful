@@ -41,20 +41,26 @@
   });
 
   // --- Community message -------------------------------------------------
+  // The "Import (search)" path was removed from this page (dead UI: v1 ships
+  // no concrete provider) — only Compose remains. The platform picker is now
+  // an icon-button group backed by a hidden `platform` input so the existing
+  // FormData.get("platform") read below keeps working unchanged.
 
-  document.getElementById("community-search-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const data = new FormData(event.target);
-    const params = new URLSearchParams({ platform: data.get("platform"), q: data.get("q") || "" });
-    const res = await fetch(`/api/community/search?${params}`);
-    const results = await res.json();
-    const container = document.getElementById("community-search-results");
-    container.textContent = results.length
-      ? `${results.length} result(s)`
-      : "No results (v1 ships no live provider — use the compose form below).";
+  const communityForm = document.getElementById("community-custom-form");
+  const platformInput = communityForm.querySelector("input[name='platform']");
+  communityForm.querySelectorAll("button[data-role='platform-option']").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      communityForm.querySelectorAll("button[data-role='platform-option']").forEach((other) => {
+        other.classList.remove("is-selected");
+        other.setAttribute("aria-pressed", "false");
+      });
+      btn.classList.add("is-selected");
+      btn.setAttribute("aria-pressed", "true");
+      platformInput.value = btn.dataset.platform;
+    });
   });
 
-  document.getElementById("community-custom-form").addEventListener("submit", async (event) => {
+  communityForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const data = new FormData(event.target);
     const text = (data.get("text") || "").toString().trim();
@@ -98,7 +104,15 @@
       const end = parseFloat(block.querySelector("[data-role='timer-end']").value);
       const positionEl = block.querySelector("[data-role='timer-position']");
       const position = positionEl ? positionEl.value : "center";
-      post(`/api/live/timer/${which}/start`, { start_seconds: start, end_seconds: end, position });
+      const body = { start_seconds: start, end_seconds: end, position };
+      // Style picker only exists on the big timer's form (Deep Dive Q15) —
+      // the corner timer never sends a style, so it stays on the server
+      // default ("solid").
+      const styleEl = block.querySelector("[data-role='timer-style']");
+      if (styleEl) {
+        body.style = styleEl.value;
+      }
+      post(`/api/live/timer/${which}/start`, body);
     });
   });
 

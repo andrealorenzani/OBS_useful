@@ -37,6 +37,18 @@ def test_no_opaque_background_declared_on_html_or_body_anywhere_in_screen_css():
                 )
 
 
+def test_timer_text_only_style_has_no_background_box():
+    # Code changes §2c: the "text-only" big-timer style is explicitly meant
+    # to render with no background/box at all.
+    css = _read(STATIC_DIR / "effects" / "timer.css")
+    match = re.search(r"\.timer-display--style-text-only\s*\{([^}]*)\}", css)
+    assert match, "expected a .timer-display--style-text-only rule in timer.css"
+    rule_body = match.group(1)
+    for decl in re.finditer(r"background(?:-color)?\s*:\s*([^;]+);", rule_body):
+        value = decl.group(1).strip().lower()
+        assert value in ("transparent", "none"), f"text-only timer style has a background: {value!r}"
+
+
 def test_no_effect_css_file_sets_an_opaque_full_viewport_background():
     effects_dir = STATIC_DIR / "effects"
     for css_file in effects_dir.glob("*.css"):

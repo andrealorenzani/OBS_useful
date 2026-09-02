@@ -14,17 +14,35 @@
 
     const card = document.createElement("div");
     card.className = `community-card platform-${slot.platform} community-card--enter`;
+    card.style.setProperty("--community-accent", slot.accent_color || "#5b8def");
+
+    if (slot.logo_url) {
+      const logo = document.createElement("img");
+      logo.className = "community-card__logo";
+      logo.src = slot.logo_url;
+      logo.alt = "";
+      card.appendChild(logo);
+    }
+
+    const content = document.createElement("div");
+    content.className = "community-card__content";
 
     const header = document.createElement("div");
     header.className = "community-card__header";
-    header.textContent = slot.author;
-    card.appendChild(header);
+    const badge = document.createElement("span");
+    badge.className = "community-card__platform-badge";
+    badge.textContent = slot.platform.charAt(0).toUpperCase();
+    header.appendChild(badge);
+    const authorText = document.createTextNode(slot.author);
+    header.appendChild(authorText);
+    content.appendChild(header);
 
     const body = document.createElement("div");
     body.className = "community-card__body";
     body.textContent = slot.text;
-    card.appendChild(body);
+    content.appendChild(body);
 
+    card.appendChild(content);
     region.appendChild(card);
   }
 

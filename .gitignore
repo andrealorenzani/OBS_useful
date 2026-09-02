@@ -133,3 +133,6 @@ dmypy.json
 # OBS_director runtime data (JSON-file persistence) - keep dir, ignore contents
 /data/*.json
 !/data/.gitkeep
+
+# Local backup bundles (see .ignore/*.bundle) - never track
+.ignore/

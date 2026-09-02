@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # https://developers.strava.com/docs/webhookexample/
+import os
 
 def checkToken(reqHandler, req):
 	if req.startswith("/webhook"):
-	    verify_token = "REDACTED"
+	    verify_token = os.environ.get("STRAVA_VERIFY_TOKEN", "")
 	    print(req)
 	    print(urlparse.urlparse(req).query)
 	    queryParam = urlparse.parse_qs(urlparse.urlparse(req).query)

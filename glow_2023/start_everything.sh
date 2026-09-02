@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo url="https://www.duckdns.org/update?domains=supermaestro-uk&token=REDACTED&ip=" | curl -k -K -
+echo url="https://www.duckdns.org/update?domains=supermaestro-uk&token=${DUCKDNS_TOKEN:?set DUCKDNS_TOKEN}&ip=" | curl -k -K -
 echo "Updated the dns"
 echo "https://supermaestro-uk.duckdns.org:8998"
 echo "Reverse proxy setting at cat /etc/nginx/sites-enabled/reverse-proxy.conf"
@@ -16,9 +16,9 @@ echo "Firewall disabled"
 curl -X POST \
   https://www.strava.com/api/v3/push_subscriptions \
   -F client_id=113946 \
-  -F client_secret=REDACTED \
+  -F client_secret="${STRAVA_CLIENT_SECRET:?set STRAVA_CLIENT_SECRET}" \
   -F callback_url=https://supermaestro-uk.ddns.net/webhook \
-  -F verify_token=REDACTED
+  -F verify_token="${STRAVA_VERIFY_TOKEN:?set STRAVA_VERIFY_TOKEN}"
 echo "Subscription to strava webhook"
 
 while true; do

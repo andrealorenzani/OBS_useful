@@ -3,6 +3,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import time
 from datetime import datetime
+import os
 
 # datetime object containing current date and time
 
@@ -176,11 +177,11 @@ class MyServer(BaseHTTPRequestHandler):
                 return status.full_text
 
 
-        API_KEY="REDACTED"
-        API_SECRET_KEY="REDACTED"
+        API_KEY = os.environ.get("TWITTER_API_KEY", "")
+        API_SECRET_KEY = os.environ.get("TWITTER_API_SECRET_KEY", "")
 
-        ACCESS_TOKEN="REDACTED"
-        ACCESS_TOKEN_SECRET="REDACTED"
+        ACCESS_TOKEN = os.environ.get("TWITTER_ACCESS_TOKEN", "")
+        ACCESS_TOKEN_SECRET = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET", "")
         import tweepy
         import json
         # Authenticate to Twitter

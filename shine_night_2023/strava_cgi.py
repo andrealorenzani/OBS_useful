@@ -41,7 +41,7 @@ if os.environ.get("QUERY_STRING", None):
     token = queryParam.get('hub.verify_token', None)
     challenge = queryParam.get('hub.challenge', None)
     if mode and token:
-        if mode == 'subscribe' and token == "REDACTED":
+        if mode == 'subscribe' and token == os.environ.get("STRAVA_VERIFY_TOKEN", ""):
             sendData("{\"hub.challenge\": \"%s\"}\n\n" % challenge)
         else: 
             respond(None, 403)

@@ -1,3 +1,4 @@
+import os
 import requests
 import urllib.parse
 
@@ -10,10 +11,10 @@ def getTweet(url, encparams, referrer, name='Anonymous'):
         'Referer': referrer,
         'x-twitter-auth-type': 'OAuth2Session',
         'x-client-uuid': '58cb0367-92c0-4cfe-8626-c6f0e855f387',
-        'x-csrf-token': 'REDACTED',
+        'x-csrf-token': os.environ.get("TWITTER_CSRF_TOKEN", ""),
         'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/117.0',
-        'authorization': 'Bearer REDACTED',
-        'Cookie': 'guest_id=REDACTED; dnt=1; ads_prefs="HBISAAA="; kdt=REDACTED; twid=u%3D16858208; auth_token=REDACTED; ct0=REDACTED; des_opt_in=Y; _twitter_sess=REDACTED; lang=it',
+        'authorization': f'Bearer {os.environ.get("TWITTER_BEARER_TOKEN", "")}',
+        'Cookie': os.environ.get("TWITTER_COOKIE", ""),
         'Accept-Charset': 'UTF-8',
         'X-Client-Transaction-Id': '1kZWmNKAn+GsxNCYLLk9WBvXKYuE9OFIr1QttZi24ctq0EK4Ik3vUKdPhNmVpilhn56aadZCRBAvs7KV753XGJw6Duw91w',
         'Sec-Fetch-Dest': 'empty',
